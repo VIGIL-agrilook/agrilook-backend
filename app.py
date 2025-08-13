@@ -10,6 +10,8 @@ from config.user_data import USER_DATA
 from config.crop_codes import get_crop_code, get_crop_name, get_available_crops
 from services.chat_service import chat_bp
 from services.soil_fertilizer_service import SoilFertilizerService
+from services.weather_service import weather_service, get_current_weather_data
+from services.multiple_crop_service import MultipleCropFertilizerService
 
 # 환경변수 로드
 load_dotenv()
@@ -50,199 +52,209 @@ def get_crops():
 @app.route('/user-info', methods=['GET'])
 def get_user_info():
     """사용자 정보 조회"""
-    return jsonify({
-        "status": "success",
-        "data": USER_DATA
-    })
+    try:
+        # 기본 사용자 데이터에 작물 코드 추가
+        user_info = USER_DATA.copy()
+        
+        # 주 작물의 코드 추가
+        crop_name = user_info["crop"]["name"]
+        crop_code = get_crop_code(crop_name)
+        if crop_code:
+            user_info["crop"]["code"] = crop_code
+        
+        return jsonify({
+            "status": "success",
+            "data": user_info
+        })
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"사용자 정보 조회 실패: {str(e)}"
+        }), 500
 
 
 @app.route('/api/fertilizer-prescription', methods=['POST'])
 def get_fertilizer_prescription():
-    """토양-비료 처방 API - 메인 기능"""
+    """토양-비료 처방 API - 모든 등록된 작물 처리"""
     try:
-        # 요청 데이터에서 작물 정보 받기
         data = request.get_json() if request.is_json else {}
-        crop_name = data.get('crop_name', USER_DATA['crop']['name'])  # 기본값은 USER_DATA에서
         
-        # 작물 코드 조회
-        crop_code = get_crop_code(crop_name)
-        if not crop_code:
-            return jsonify({
-                "status": "error",
-                "message": f"지원하지 않는 작물입니다: {crop_name}. /api/crops 엔드포인트에서 지원 작물을 확인하세요."
-            }), 400
-        
-        # 토양 정보는 요청에서 받거나 USER_DATA 기본값 사용
+        # 토양 데이터
         soil_data = data.get('soil', USER_DATA['soil'])
         
-        service = SoilFertilizerService()
-        farm_info = service.get_farm_info()
+        # 다중 작물 서비스 사용
+        multi_service = MultipleCropFertilizerService()
+        result = multi_service.get_user_crops_recommendation(soil_data)
         
-        # 작물 정보 업데이트
-        farm_info['crop_name'] = crop_name
-        farm_info['crop_code'] = crop_code
-        farm_info['soil'].update(soil_data)
-        
-        fertilizer_data = service.call_fertilizer_api(farm_info)
-        nutrient_needs = service.calculate_total_nutrients(fertilizer_data, farm_info)
-        compost_needs = service.calculate_compost_needs(fertilizer_data, farm_info)
-        
-        # 비료 추천 (밑거름 3개, 웃거름 3개)
-        base_recommendations = service.recommend_fertilizers(
-            nutrient_needs['base']['N'], 
-            nutrient_needs['base']['P'], 
-            nutrient_needs['base']['K'],
-            "base", 3
-        )
-        
-        additional_recommendations = service.recommend_fertilizers(
-            nutrient_needs['additional']['N'],
-            nutrient_needs['additional']['P'], 
-            nutrient_needs['additional']['K'],
-            "additional", 3
-        )
-        
-        # 사용량 계산 및 응답 데이터 구성
-        base_fertilizers = _process_fertilizers(base_recommendations, fertilizer_data, farm_info, 'pre')
-        additional_fertilizers = _process_fertilizers(additional_recommendations, fertilizer_data, farm_info, 'post')
-        
-        response_data = {
-            "status": "success",
-            "farm_info": {
-                "crop_name": farm_info['crop_name'],
-                "crop_code": farm_info['crop_code'], 
-                "farm_size_a": farm_info['farm_size_a'],
-                "farm_size_10a": farm_info['farm_size_10a']
-            },
-            "soil_analysis": farm_info['soil'],
-            "fertilizer_prescription": {
-                "standard_per_1000sqm": {
-                    "base": {
-                        "N": float(fertilizer_data.get('pre_Fert_N', '0')),
-                        "P": float(fertilizer_data.get('pre_Fert_P', '0')),
-                        "K": float(fertilizer_data.get('pre_Fert_K', '0'))
-                    },
-                    "additional": {
-                        "N": float(fertilizer_data.get('post_Fert_N', '0')),
-                        "P": float(fertilizer_data.get('post_Fert_P', '0')),
-                        "K": float(fertilizer_data.get('post_Fert_K', '0'))
-                    }
-                },
-                "total_farm_needs": nutrient_needs
-            },
-            "compost_recommendations": compost_needs,
-            "fertilizer_recommendations": {
-                "base_fertilizers": base_fertilizers,
-                "additional_fertilizers": additional_fertilizers
-            }
-        }
-        
-        return jsonify(response_data)
-        
-    except Exception as e:
-        return jsonify({
-            "status": "error", 
-            "message": str(e),
-            "type": "fertilizer_prescription_error"
-        }), 500
-
-
-def _process_fertilizers(recommendations, fertilizer_data, farm_info, fert_type):
-    """비료 처리 헬퍼 함수"""
-    service = SoilFertilizerService()
-    fertilizers = []
-    
-    prefix = 'pre_Fert' if fert_type == 'pre' else 'post_Fert'
-    
-    for fert in recommendations:
-        usage = service.calculate_fertilizer_usage(
-            fert,
-            float(fertilizer_data.get(f'{prefix}_N', '0')),
-            float(fertilizer_data.get(f'{prefix}_P', '0')),
-            float(fertilizer_data.get(f'{prefix}_K', '0')),
-            farm_info['farm_size_10a']
-        )
-        fertilizers.append({
-            'name': fert['비료종류'],
-            'npk': f"N-{fert['질소']}% P-{fert['인산']}% K-{fert['칼리']}%",
-            'nitrogen': fert['질소'],
-            'phosphorus': fert['인산'],
-            'potassium': fert['칼리'],
-            'usage_kg': usage['usage_kg'] if usage else 0,
-            'bags': usage['bags'] if usage else 0,
-            'shortage_p': usage['shortage_p'] if usage else 0,
-            'shortage_k': usage['shortage_k'] if usage else 0
-        })
-    
-    return fertilizers
-
-
-@app.route('/api/fertilizer-prescription/test', methods=['GET'])
-def test_fertilizer_prescription():
-    """테스트용 비료 처방 API - 기본 작물 사용"""
-    try:
-        service = SoilFertilizerService()
-        farm_info = service.get_farm_info()
-        fertilizer_data = service.call_fertilizer_api(farm_info)
-        nutrient_needs = service.calculate_total_nutrients(fertilizer_data, farm_info)
-        compost_needs = service.calculate_compost_needs(fertilizer_data, farm_info)
-        
-        # 비료 추천 (밑거름 3개, 웃거름 3개)
-        base_recommendations = service.recommend_fertilizers(
-            nutrient_needs['base']['N'], 
-            nutrient_needs['base']['P'], 
-            nutrient_needs['base']['K'],
-            "base", 3
-        )
-        
-        additional_recommendations = service.recommend_fertilizers(
-            nutrient_needs['additional']['N'],
-            nutrient_needs['additional']['P'], 
-            nutrient_needs['additional']['K'],
-            "additional", 3
-        )
-        
-        # 사용량 계산 및 응답 데이터 구성
-        base_fertilizers = _process_fertilizers(base_recommendations, fertilizer_data, farm_info, 'pre')
-        additional_fertilizers = _process_fertilizers(additional_recommendations, fertilizer_data, farm_info, 'post')
-        
-        response_data = {
-            "status": "success",
-            "farm_info": {
-                "crop_name": farm_info['crop_name'],
-                "crop_code": farm_info['crop_code'], 
-                "farm_size_a": farm_info['farm_size_a'],
-                "farm_size_10a": farm_info['farm_size_10a']
-            },
-            "soil_analysis": farm_info['soil'],
-            "fertilizer_prescription": {
-                "standard_per_1000sqm": {
-                    "base": {
-                        "N": nutrient_needs['base']['N'],
-                        "P": nutrient_needs['base']['P'],
-                        "K": nutrient_needs['base']['K']
-                    },
-                    "additional": {
-                        "N": nutrient_needs['additional']['N'],
-                        "P": nutrient_needs['additional']['P'],
-                        "K": nutrient_needs['additional']['K']
-                    }
-                },
-                "compost_per_1000sqm": compost_needs,
-                "recommended_fertilizers": {
-                    "base_fertilizers": base_fertilizers,
-                    "additional_fertilizers": additional_fertilizers
-                }
-            }
-        }
-        
-        return jsonify(response_data)
+        return jsonify(result)
         
     except Exception as e:
         return jsonify({
             "status": "error",
             "message": f"비료 처방 실패: {str(e)}"
         }), 500
+
+
+@app.route('/api/fertilizer-prescription/test', methods=['GET'])
+def test_fertilizer_prescription():
+    """테스트용 비료 처방 API - 모든 등록된 작물 사용"""
+    try:
+        multi_service = MultipleCropFertilizerService()
+        result = multi_service.get_user_crops_recommendation()
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"테스트 비료 처방 실패: {str(e)}"
+        }), 500
+
+
+@app.route('/api/fertilizer-prescription/multiple', methods=['POST'])
+def get_multiple_fertilizer_prescription():
+    """다중 작물 비료 처방 API - 최대 3개 작물 처리"""
+    try:
+        data = request.get_json() if request.is_json else {}
+        
+        # 작물 목록 받기
+        crop_names = data.get('crop_names', USER_DATA.get('crop', {}).get('current_crops', []))
+        
+        if not crop_names:
+            return jsonify({
+                "status": "error",
+                "message": "작물 목록이 필요합니다. crop_names 배열을 제공해주세요."
+            }), 400
+        
+        if len(crop_names) > 3:
+            return jsonify({
+                "status": "error", 
+                "message": "작물은 최대 3개까지만 처리 가능합니다."
+            }), 400
+        
+        # 토양 데이터
+        soil_data = data.get('soil', USER_DATA['soil'])
+        
+        # 다중 작물 서비스 사용
+        multi_service = MultipleCropFertilizerService()
+        result = multi_service.get_multiple_fertilizer_recommendations(crop_names, soil_data)
+        
+        # 프론트엔드 최적화 형태로 포맷팅
+        formatted_result = multi_service.format_for_frontend(result)
+        
+        return jsonify(formatted_result)
+        
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"다중 작물 비료 처방 실패: {str(e)}"
+        }), 500
+
+
+@app.route('/api/fertilizer-prescription/user-crops', methods=['GET', 'POST'])
+def get_user_crops_fertilizer_prescription():
+    """사용자 등록 작물들에 대한 비료 처방"""
+    try:
+        # POST인 경우 토양 데이터 받기
+        soil_data = None
+        if request.method == 'POST' and request.is_json:
+            data = request.get_json()
+            soil_data = data.get('soil')
+        
+        multi_service = MultipleCropFertilizerService()
+        result = multi_service.get_user_crops_recommendation(soil_data)
+        
+        # 프론트엔드 최적화 형태로 포맷팅
+        formatted_result = multi_service.format_for_frontend(result)
+        
+        return jsonify(formatted_result)
+        
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"사용자 작물 비료 처방 실패: {str(e)}"
+        }), 500
+
+
+@app.route('/api/weather/current', methods=['GET'])
+def get_current_weather():
+    """현재 기상 정보 조회 (기온, 강수량, 습도 포함)"""
+    try:
+        # 기본값을 USER_DATA에서 가져오기
+        default_station = USER_DATA["location"]["station"]
+        station = request.args.get('station', default_station)
+        
+        # 기상 데이터 업데이트 및 조회
+        weather_data = weather_service.get_current_weather(station)
+        global_weather = get_current_weather_data()
+        
+        if not weather_data and global_weather["status"] != "connected":
+            return jsonify({
+                "status": "error",
+                "message": "기상 정보를 가져올 수 없습니다"
+            }), 500
+            
+        return jsonify({
+            "status": "success",
+            "data": {
+                "temperature": global_weather["temperature"],
+                "precipitation": global_weather["precipitation"], 
+                "humidity": global_weather["humidity"],
+                "location": global_weather["location"],
+                "last_updated": global_weather["last_updated"],
+                "summary": weather_service.get_weather_summary(),
+                "detailed": weather_data  # 전체 기상 정보도 포함
+            }
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"기상 정보 조회 실패: {str(e)}"
+        }), 500
+
+
+@app.route('/api/weather/update', methods=['POST', 'GET'])
+def update_weather():
+    """기상 데이터 수동 업데이트"""
+    try:
+        # 기본값을 USER_DATA에서 가져오기
+        default_station = USER_DATA["location"]["station"]
+        
+        if request.method == 'POST':
+            data = request.get_json() or {}
+            station = data.get('station', default_station)
+        else:  # GET
+            station = request.args.get('station', default_station)
+        
+        success = weather_service.update_weather_data(station)
+        
+        if success:
+            global_weather = get_current_weather_data()
+            return jsonify({
+                "status": "success",
+                "message": "기상 데이터가 업데이트되었습니다.",
+                "data": {
+                    "temperature": global_weather["temperature"],
+                    "precipitation": global_weather["precipitation"],
+                    "humidity": global_weather["humidity"],
+                    "location": global_weather["location"],
+                    "last_updated": global_weather["last_updated"],
+                    "status": global_weather["status"]
+                }
+            })
+        else:
+            return jsonify({
+                "status": "error",
+                "message": "기상 데이터 업데이트에 실패했습니다."
+            }), 500
+            
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"기상 데이터 업데이트 실패: {str(e)}"
+        }), 500
+
 
 
 if __name__ == '__main__':

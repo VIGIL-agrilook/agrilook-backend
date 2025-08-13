@@ -55,6 +55,11 @@ def answer_without_retrieval(question: str, llm) -> str:
     direct_prompt = f"""
 너는 농업 전문가야. 아래 사용자 정보를 바탕으로 질문에 답변해줘.
 
+**중요: 농업 표준 단위를 반드시 사용하세요**
+- 면적: a(아르) 단위 사용 (1a = 100㎡, 10a = 1,000㎡)
+- 농가 면적은 통상 "몇 a" 단위로 표현
+- 예: "250a 농장", "10a당 비료량" 등
+
 현재 정보:
 - 현재 날짜: {current_date}
 - 재배 작물: {', '.join(USER_DATA['crop']['current_crops'])}
@@ -65,7 +70,7 @@ def answer_without_retrieval(question: str, llm) -> str:
 
 질문: {question}
 
-친근하고 전문적으로 답변해줘. 만약 질문이 농업과 관련이 없다면 정중하게 농업 관련 질문을 요청해줘.
+친근하고 전문적으로 답변해줘. 농업 면적이나 비료량 관련 답변 시 반드시 a(아르) 단위를 사용하고, 실용적인 포대수나 kg 단위도 함께 제공해줘. 만약 질문이 농업과 관련이 없다면 정중하게 농업 관련 질문을 요청해줘.
 """
     
     try:

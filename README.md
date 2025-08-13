@@ -8,14 +8,15 @@
 - **작물별 처방**: 252개 작물에 대한 세밀한 비료 처방 지원
 - **농업 표준 단위**: a(아르) 단위 사용으로 농업 현장 친화적
 - **실용적 정보**: 구체적인 비료 제품명, 사용량, 포대수 제공
-- **AI 챗봇**: 농업 관련 질문에 대한 AI 상담 서비스
+- **AI 챗봇**: 농업 표준 단위(a, 아르) 기반 전문 상담 서비스
 
 ## 🛠 기술 스택
 
 - **Backend**: Python Flask
-- **AI/ML**: LangChain, OpenAI GPT
-- **API**: 농촌진흥청 공공데이터포털
-- **Database**: 실제 운영 시 PostgreSQL/MySQL 등 DB 사용 예정
+- **AI/ML**: LangChain, OpenAI GPT-4
+- **API**: 농촌진흥청 공공데이터포털 (농업기술실용화재단_비료·퇴비 정보)
+- **Vector DB**: FAISS + BM25 하이브리드 검색
+- **Data**: 172개 비료 제품 DB + 252개 작물 코드
 
 ## 📦 설치 및 실행
 
@@ -97,15 +98,62 @@ Content-Type: application/json
 GET /api/fertilizer-prescription/test
 ```
 
-### 4. AI 챗봇
+### 4. 현재 기상 정보 (간편 조회)
+```
+GET /api/weather/current?station=108
+```
+
+**응답 예시:**
+```json
+{
+  "status": "success",
+  "data": {
+    "temperature": 28.5,
+    "precipitation": 0,
+    "humidity": 65,
+    "location": "서울",
+    "last_updated": "2025-08-13T14:30:00",
+    "summary": "현재 서울 지역 기온 28.5°C, 습도 65%, 강수 없음"
+  }
+}
+```
+
+### 5. 기상 데이터 업데이트
+```
+POST /api/weather/update
+Content-Type: application/json
+
+{
+  "station": "108"
+}
+```
+
+### 6. 농업 맞춤 기상 요약
+```
+GET /api/weather/agricultural-summary?station=108
+```
+
+**주요 관측지점:**
+- 서울: 108
+- 인천: 112  
+- 수원: 119
+- 춘천: 101
+- 강릉: 105
+
+### 7. AI 챗봇 (농업 전문 상담)
 ```
 POST /chat
 Content-Type: application/json
 
 {
-  "message": "토마토 재배에 대해 알려주세요"
+  "message": "250a 농장에서 토마토 재배할 때 필요한 비료량은?"
 }
 ```
+
+**응답 예시:**
+- 농업 표준 단위 사용 (a, 아르)
+- 구체적인 제품명과 포대수 안내
+- 토양 조건별 맞춤 조언
 
 ## 📊 지원 작물
 
@@ -118,13 +166,45 @@ Content-Type: application/json
 - **과수류**: 사과, 배, 포도, 감귤, 복숭아 등
 - **특용작물**: 인삼, 도라지, 더덕 등
 
+## 📁 프로젝트 구조
+
+```
+api/
+├── app.py                    # Flask 메인 애플리케이션
+├── requirements.txt          # Python 패키지 의존성
+├── example.env              # 환경변수 템플릿
+├── config/                  # 설정 파일들
+│   ├── __init__.py
+│   ├── user_data.py        # 사용자 데이터 설정
+│   └── crop_codes.py       # 252개 작물 코드 매핑
+├── services/                # 서비스 로직
+│   ├── __init__.py
+│   ├── soil_fertilizer_service.py  # 토양-비료 API 서비스
+│   ├── qa_service.py       # QA 서비스
+│   ├── routing_service.py  # 라우팅 서비스
+│   └── chat_service.py     # AI 챗봇 서비스
+├── data/                   # 데이터 파일들
+│   ├── README.md          # 데이터 설명
+│   ├── 밑거름.json        # 기비 데이터 (137개 제품)
+│   └── 웃거름.json        # 추비 데이터 (35개 제품)
+├── utils/                  # 유틸리티 및 개발 도구
+│   ├── __init__.py
+│   └── csv_to_json.py     # CSV → JSON 변환 도구
+├── vectorstore/           # 벡터 데이터베이스
+│   ├── index.faiss       # FAISS 벡터 인덱스
+│   └── index.pkl         # 벡터 메타데이터
+└── deploy/               # 배포 관련
+    ├── azure/           # Azure 배포 설정
+    └── scripts/         # 배포 스크립트
+```
+
 ## 🎯 주요 특징
 
 - **정확한 처방**: 농촌진흥청 토양환경정보시스템 기준
 - **실용적 정보**: 구체적인 제품명과 사용량 (kg, 포대 수)
 - **농업 친화적**: a(아르) 단위 사용
 - **다양한 작물**: 252개 작물별 맞춤 처방
-- **AI 상담**: 농업 전문 지식 기반 챗봇
+- **AI 상담**: 농업 표준 단위(a) 기반 전문 지식 챗봇
 
 ## 📄 라이선스
 

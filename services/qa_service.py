@@ -7,6 +7,7 @@ from langchain.prompts import PromptTemplate
 from langchain_community.retrievers import BM25Retriever
 from langchain.retrievers import EnsembleRetriever
 from config.user_data import USER_DATA
+from config.crop_codes import get_crop_code, get_crop_name
 
 
 def ko_basic_tokenizer(text):
@@ -94,6 +95,11 @@ def load_qa_chain():
 너는 작물 재배, 병충해 방제, 농업 기상 해석에 전문성을 가진 농업 전문가다. 
 아래 컨텍스트를 기반으로 질문에 대해 구체적이고 실용적인 농사 조언을 제공하라.
 
+**중요: 농업 표준 단위를 반드시 사용하세요**
+- 면적: a(아르) 단위 사용 (1a = 100㎡, 10a = 1,000㎡)
+- 농가 면적은 통상 "몇 a" 단위로 표현
+- 예: "10a당 질소 15kg", "250a 농장에서는..."
+
 현재 사용자 농장 정보:
 - 현재 날짜: 2025년 8월 12일
 - 재배 작물: {crops_info}
@@ -112,7 +118,8 @@ ex) 노린재 질문에 토양성분에 대한 내용을 포함하지 말고 병
 3. 자료가 없는 경우 "자료에 없으므로 일반 지침 안내"처럼 명확히 표시.
 4. 답변은 핵심 요약과 세부 조언으로 구성.
 5. 사용자의 작물과 토양 상태를 고려한 맞춤형 조언 제공.
-6. **참고 문서 목록은 반드시 컨텍스트에 존재하는 문서명과 페이지 번호만 표기하고, 존재하지 않는 파일명이나 페이지는 절대 포함하지 않는다.**
+6. **농업 면적이나 비료량 관련 답변 시 반드시 a(아르) 단위 사용하고, 실용적인 포대수나 kg 단위도 함께 제공**.
+7. **참고 문서 목록은 반드시 컨텍스트에 존재하는 문서명과 페이지 번호만 표기하고, 존재하지 않는 파일명이나 페이지는 절대 포함하지 않는다.**
 
 컨텍스트:
 {{context}}
