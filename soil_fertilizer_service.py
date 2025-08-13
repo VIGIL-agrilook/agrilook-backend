@@ -2,7 +2,11 @@ import requests
 import os
 import json
 import xmltodict
+from dotenv import load_dotenv
 from config.user_data import USER_DATA
+
+# 환경변수 로드
+load_dotenv()
 
 class SoilFertilizerService:
     def __init__(self):
@@ -14,15 +18,20 @@ class SoilFertilizerService:
         """비료 추천 API의 XML 응답을 파싱하여 구조화된 데이터로 변환"""
         try:
             json_content = xmltodict.parse(xml_content)
-            response_data = json_content.get('OpenAPI_ServiceResponse', {})
             
-            # 에러 체크
-            header = response_data.get('cmmMsgHeader', {})
-            if header.get('returnReasonCode') != '00':
+            # response 구조로 파싱
+            response_data = json_content.get('response', {})
+            
+            # 헤더 체크
+            header = response_data.get('header', {})
+            if header.get('result_Code') != '200':
+                print(f"⚠️ API 오류: {header.get('result_Msg', 'Unknown error')}")
                 return None
             
-            # 데이터 추출
-            items = response_data.get('msgBody', {})
+            # body에서 items 추출
+            body = response_data.get('body', {})
+            items = body.get('items', {})
+            
             if isinstance(items, dict) and 'item' in items:
                 item_data = items['item']
                 if isinstance(item_data, list) and len(item_data) > 0:
@@ -32,7 +41,12 @@ class SoilFertilizerService:
             else:
                 item = items
             
-            return {
+            result = {
+                'success': True,
+                'result_Code': header.get('result_Code', '200'),
+                'result_Msg': header.get('result_Msg', 'OK'),
+                'crop_Code': item.get('crop_Code', ''),
+                'crop_Nm': item.get('crop_Nm', ''),
                 'pre_Fert_N': item.get('pre_Fert_N', '0'),
                 'pre_Fert_P': item.get('pre_Fert_P', '0'),
                 'pre_Fert_K': item.get('pre_Fert_K', '0'),
@@ -44,6 +58,8 @@ class SoilFertilizerService:
                 'pre_Compost_Chick': item.get('pre_Compost_Chick', '0'),
                 'pre_Compost_Mix': item.get('pre_Compost_Mix', '0')
             }
+            
+            return result
             
         except Exception as e:
             return None
@@ -63,36 +79,41 @@ class SoilFertilizerService:
     
     def call_fertilizer_api(self, farm_info):
         """공공데이터 API 호출"""
-        # 실제 API 호출 (현재는 테스트 데이터 사용)
         print(f"🌐 API 호출 중... 작물: {farm_info['crop_name']} (코드: {farm_info['crop_code']})")
-        print("⚠️  API 연결 실패, 테스트 데이터로 시연")
-        return self._get_test_data()
         
-        # TODO: 실제 API 연결시 아래 코드 활성화
-        # try:
-        #     soil = farm_info['soil']
-        #     params = {
-        #         'serviceKey': self.api_key,
-        #         'crop_Code': farm_info['crop_code'],
-        #         'acid': soil.get('ph', 6.5),
-        #         'om': soil.get('om', 22),
-        #         'vldpha': soil.get('vldpha', 10),
-        #         'posifert_K': soil.get('posifert_K', 4),
-        #         'posifert_Ca': soil.get('posifert_Ca', 6),
-        #         'posifert_Mg': soil.get('posifert_Mg', 13),
-        #         'selc': soil.get('selc', 6)
-        #     }
-        #     
-        #     response = requests.post(self.api_url, data=params, timeout=10)
-        #     
-        #     if response.status_code == 200:
-        #         parsed_data = self.parse_fertilizer_response(response.text)
-        #         return parsed_data if parsed_data else self._get_test_data()
-        #     else:
-        #         return self._get_test_data()
-        #         
-        # except Exception as e:
-        #     return self._get_test_data()
+        # 실제 API 호출
+        try:
+            soil = farm_info['soil']
+            params = {
+                'serviceKey': self.api_key,
+                'crop_Code': farm_info['crop_code'],
+                'acid': soil.get('ph', 6.5),
+                'om': soil.get('om', 22),
+                'vldpha': soil.get('vldpha', 10),
+                'posifert_K': soil.get('posifert_K', 4),
+                'posifert_Ca': soil.get('posifert_Ca', 6),
+                'posifert_Mg': soil.get('posifert_Mg', 13),
+                'selc': soil.get('selc', 6)
+            }
+            
+            response = requests.get(self.api_url, params=params, timeout=10)
+            
+            if response.status_code == 200:
+                print("✅ API 호출 성공!")
+                parsed_data = self.parse_fertilizer_response(response.text)
+                if parsed_data:
+                    return parsed_data
+                else:
+                    print("⚠️ 응답 파싱 실패, 테스트 데이터 사용")
+                    return self._get_test_data()
+            else:
+                print(f"⚠️  API 응답 오류: {response.status_code}")
+                return self._get_test_data()
+                
+        except Exception as e:
+            print(f"⚠️ API 호출 실패: {str(e)}")
+            print("� 테스트 데이터로 진행합니다")
+            return self._get_test_data()
     
     def _get_test_data(self):
         """테스트용 비료 데이터"""
@@ -380,42 +401,21 @@ class SoilFertilizerService:
         # 2. 토양 분석 결과 출력
         self.display_soil_analysis(farm_info)
         
-        # 3. API 호출
-        xml_response = self.call_fertilizer_api(farm_info)
+        # 3. API 호출 및 응답 처리
+        fertilizer_data = self.call_fertilizer_api(farm_info)
         
-        # 4. API 응답 파싱 (테스트 데이터 우선 사용)
-        # API 호출 실패시 테스트 데이터 사용 (맥주보리 기준)
-        print("⚠️  API 연결 실패, 테스트 데이터로 시연")
-        fertilizer_data = {
-            'success': True,
-            'result_Code': '200',
-            'result_Msg': 'OK',
-            'crop_Code': '01001',
-            'crop_Nm': '맥주보리', 
-            'pre_Fert_N': '4.9',
-            'pre_Fert_P': '24.8',
-            'pre_Fert_K': '3.0',
-            'post_Fert_N': '3.2',
-            'post_Fert_P': '0.0',
-            'post_Fert_K': '0.0',
-            'pre_Compost_Cattl': '1500',
-            'pre_Compost_Pig': '330',
-            'pre_Compost_Chick': '255',
-            'pre_Compost_Mix': '541'
-        }
-        
-        if not fertilizer_data or not fertilizer_data['success']:
+        if not fertilizer_data or not fertilizer_data.get('success'):
             print("❌ 처방 계산 실패")
             return
         
-        # 5. 처방 결과 출력
+        # 4. 처방 결과 출력
         nutrient_needs = self.display_fertilizer_prescription(fertilizer_data, farm_info)
         compost_needs = self.display_compost_prescription(fertilizer_data, farm_info)
         
-        # 6. 비료 추천
+        # 5. 비료 추천
         self.display_fertilizer_recommendations(nutrient_needs)
         
-        # 7. 결과 요약
+        # 6. 결과 요약
         print(f"\n📋 처방 결과 요약")
         print("=" * 50)
         print(f"✅ 작물: {fertilizer_data.get('crop_Nm', '맥주보리')}")
