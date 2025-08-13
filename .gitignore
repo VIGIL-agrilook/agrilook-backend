@@ -15,6 +15,9 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+*.egg-info/
+dist/
+build/
 
 # IDE 관련
 .vscode/
@@ -42,12 +45,36 @@ logs/
 *.sqlite
 *.sqlite3
 
-# 벡터 스토어 (크기가 큰 바이너리 파일) - 개발용으로 포함
+# 테스트 관련
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+*.cover
+.hypothesis/
+
+# 임시 파일 및 백업
+*.bak
+*.backup
+*~
+.cache/
+
+# Flask 관련
+instance/
+
+# 벡터 스토어 (개발용으로 포함)
 # vectorstore/
 # *.faiss  
 # *.pkl
 
-# 배포 관련 (요청에 따라 제외)
+# 배포 관련
+.vercel/
+.netlify/
+heroku.yml
+
+# 개발 중 생성된 임시 README 파일들
+README_CLEANED.md
+README_IMPROVED.md
 deploy/
 
 # 테스트 파일

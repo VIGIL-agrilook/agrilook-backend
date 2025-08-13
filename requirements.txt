@@ -2,10 +2,15 @@
 Flask==3.1.1
 python-dotenv==1.1.1
 gunicorn==23.0.0
+flask-cors==5.0.0
 
 # API 및 데이터 처리
 requests==2.32.4
 xmltodict==0.14.2
+
+# 데이터 분석 및 처리
+pandas>=2.0.0
+numpy>=1.24.0
 
 # LangChain AI 체인
 langchain==0.3.27
@@ -18,3 +23,6 @@ rank-bm25==0.2.2
 
 # OpenAI API
 openai==1.99.9
+
+# 날씨 및 농업 데이터 처리
+python-dateutil>=2.8.0
