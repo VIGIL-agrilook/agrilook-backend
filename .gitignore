@@ -1,0 +1,91 @@
+# 환경 변수 및 설정 파일
+.env
+*.env
+!example.env
+
+# Python 관련
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE 관련
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS 관련
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.tmp
+
+# 로그 파일
+*.log
+logs/
+
+# 데이터베이스
+*.db
+*.sqlite
+*.sqlite3
+
+# 벡터 스토어 (크기가 큰 바이너리 파일) - 개발용으로 포함
+# vectorstore/
+# *.faiss  
+# *.pkl
+
+# 배포 관련 (요청에 따라 제외)
+deploy/
+
+# 테스트 파일
+test_*.py
+*_test.py
+tests/
+
+# 개발 유틸리티 (DB 이전 후 불필요)
+csv_to_json.py
+
+# 원본 CSV 파일들 (JSON으로 변환된 후 불필요)
+*.csv
+
+# 임시 파일
+temp/
+tmp/
+*.bak
+*.old
+
+# 패키지 설치 관련
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
