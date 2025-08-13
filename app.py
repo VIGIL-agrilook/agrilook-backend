@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from config.user_data import USER_DATA
 from config.crop_codes import get_crop_code, get_crop_name, get_available_crops
 from services.chat_service import chat_bp
-from soil_fertilizer_service import SoilFertilizerService
+from services.soil_fertilizer_service import SoilFertilizerService
 
 # 환경변수 로드
 load_dotenv()

@@ -248,13 +248,13 @@ class SoilFertilizerService:
     def load_fertilizer_database(self):
         """비료 데이터베이스 로드"""
         try:
-            with open('밑거름.json', 'r', encoding='utf-8') as f:
+            with open('data/밑거름.json', 'r', encoding='utf-8') as f:
                 base_fertilizers = json.load(f)
-            with open('웃거름.json', 'r', encoding='utf-8') as f:
+            with open('data/웃거름.json', 'r', encoding='utf-8') as f:
                 additional_fertilizers = json.load(f)
             return base_fertilizers, additional_fertilizers
         except FileNotFoundError:
-            print("⚠️ 비료 데이터베이스 파일이 없습니다. csv_to_json.py를 먼저 실행해주세요.")
+            print("⚠️ 비료 데이터베이스 파일이 없습니다. utils/csv_to_json.py를 먼저 실행해주세요.")
             return [], []
     
     def recommend_fertilizers(self, target_n, target_p, target_k, fertilizer_type="base", top_n=2):
