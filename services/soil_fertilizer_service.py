@@ -9,6 +9,118 @@ from config.user_data import USER_DATA
 load_dotenv()
 
 class SoilFertilizerService:
+    def get_raw_public_api_result(self, farm_info):
+        """공공데이터포털 API 원본 결과 반환"""
+        try:
+            soil = farm_info['soil']
+            params = {
+                'serviceKey': self.api_key,
+                'crop_Code': farm_info['crop_code'],
+                'acid': soil.get('ph', 6.5),
+                'om': soil.get('om', 22),
+                'vldpha': soil.get('vldpha', 10),
+                'posifert_K': soil.get('posifert_K', 4),
+                'posifert_Ca': soil.get('posifert_Ca', 6),
+                'posifert_Mg': soil.get('posifert_Mg', 13),
+                'selc': soil.get('selc', 6)
+            }
+            response = requests.get(self.api_url, params=params, timeout=10)
+            if response.status_code == 200:
+                return response.text
+            else:
+                return {"error": "API response error", "status_code": response.status_code}
+        except Exception as e:
+            return {"error": str(e)}
+    def get_recommendation_bundle(self):
+        print("[DEBUG] get_recommendation_bundle called")
+        """비료 추천 결과를 통합 구조로 반환 (프론트엔드용)"""
+        farm_info = self.get_farm_info()
+        fertilizer_data = self.fetch_fertilizer_api(farm_info)
+        compost = self.get_compost_amounts(fertilizer_data, farm_info)
+        nutrients = self.get_nutrient_requirements(fertilizer_data, farm_info)
+        def simple_fert_list(fert_list):
+            return [
+                {
+                    "id": fert.get("_id"),
+                    "name": fert.get("name"),
+                    "N": fert.get("grade", {}).get("N"),
+                    "P2O5": fert.get("grade", {}).get("P2O5"),
+                    "K2O": fert.get("grade", {}).get("K2O"),
+                    "bag_kg": fert.get("bag_kg")
+                }
+                for fert in fert_list
+            ]
+        base_ferts = simple_fert_list(self.recommend_products(
+            nutrients['base']['N'], nutrients['base']['P'], nutrients['base']['K'], "base", 3))
+        add_ferts = simple_fert_list(self.recommend_products(
+            nutrients['additional']['N'], nutrients['additional']['P'], nutrients['additional']['K'], "additional", 3))
+        crop_name = farm_info.get('crop_name', '')
+        farm = USER_DATA.get('farm', {})
+        area_sqm = farm.get('area_m2', 0)
+        farm_id = farm.get('_id', '')
+        return {
+            "compost": compost,
+            "crop": {"name": crop_name},
+            "fertilizer": {
+                "base": base_ferts,
+                "additional": add_ferts
+            },
+            "field": {
+                "area_sqm": area_sqm,
+                "id": farm_id
+            }
+        }
+    def get_compost_amounts(self, fertilizer_data, farm_info):
+        """퇴비 필요량 반환"""
+        farm_size_10a = farm_info['farm_size_10a']
+        print(f"[DEBUG] farm_size_10a: {farm_size_10a}")
+        return {
+            "cattle_kg": float(fertilizer_data.get('pre_Compost_Cattl', '0')) * farm_size_10a,
+            "chicken_kg": float(fertilizer_data.get('pre_Compost_Chick', '0')) * farm_size_10a,
+            "mixed_kg": float(fertilizer_data.get('pre_Compost_Mix', '0')) * farm_size_10a,
+            "pig_kg": float(fertilizer_data.get('pre_Compost_Pig', '0')) * farm_size_10a,
+        }
+    def get_nutrient_requirements(self, fertilizer_data, farm_info):
+        """농장 전체 양분 필요량 반환"""
+        farm_size_10a = farm_info['farm_size_10a']
+        return {
+            'base': {
+                'N': float(fertilizer_data.get('pre_Fert_N', '0')) * farm_size_10a,
+                'P': float(fertilizer_data.get('pre_Fert_P', '0')) * farm_size_10a,
+                'K': float(fertilizer_data.get('pre_Fert_K', '0')) * farm_size_10a
+            },
+            'additional': {
+                'N': float(fertilizer_data.get('post_Fert_N', '0')) * farm_size_10a,
+                'P': float(fertilizer_data.get('post_Fert_P', '0')) * farm_size_10a,
+                'K': float(fertilizer_data.get('post_Fert_K', '0')) * farm_size_10a
+            }
+        }
+    def fetch_fertilizer_api(self, farm_info):
+        """공공데이터 API 호출"""
+        try:
+            soil = farm_info['soil']
+            params = {
+                'serviceKey': self.api_key,
+                'crop_Code': farm_info['crop_code'],
+                'acid': soil.get('ph', 6.5),
+                'om': soil.get('om', 22),
+                'vldpha': soil.get('vldpha', 10),
+                'posifert_K': soil.get('posifert_K', 4),
+                'posifert_Ca': soil.get('posifert_Ca', 6),
+                'posifert_Mg': soil.get('posifert_Mg', 13),
+                'selc': soil.get('selc', 6)
+            }
+            response = requests.get(self.api_url, params=params, timeout=10)
+            if response.status_code == 200:
+                parsed_data = self.parse_fertilizer_response(response.text)
+                if parsed_data and parsed_data.get('success'):
+                    return parsed_data
+                else:
+                    return self._get_test_data()
+            else:
+                return self._get_test_data()
+        except Exception:
+            return self._get_test_data()
     def __init__(self):
         """토양-비료 처방 서비스 (흙토람 스타일)"""
         self.api_key = os.getenv('FERTILIZER_API_KEY')
@@ -19,32 +131,59 @@ class SoilFertilizerService:
         try:
             json_content = xmltodict.parse(xml_content)
             
-            # response 구조로 파싱
-            response_data = json_content.get('response', {})
-            
-            # 헤더 체크
-            header = response_data.get('header', {})
-            if header.get('result_Code') != '200':
-                print(f"⚠️ API 오류: {header.get('result_Msg', 'Unknown error')}")
+            # 두 가지 응답 형태 처리
+            if 'response' in json_content:
+                # 일반적인 response 구조
+                response_data = json_content.get('response', {})
+                header = response_data.get('header', {})
+                result_code = header.get('result_Code') or header.get('resultCode')
+                result_msg = header.get('result_Msg') or header.get('resultMsg')
+                
+                if result_code != '200' and result_code != 200:
+                    return None
+                
+                # body에서 items 추출
+                body = response_data.get('body', {})
+                items = body.get('items', {})
+                
+                if isinstance(items, dict) and 'item' in items:
+                    item_data = items['item']
+                    if isinstance(item_data, list) and len(item_data) > 0:
+                        item = item_data[0]
+                    else:
+                        item = item_data
+                else:
+                    item = items
+                    
+            elif 'OpenAPI_ServiceResponse' in json_content:
+                # OpenAPI 응답 구조
+                service_response = json_content.get('OpenAPI_ServiceResponse', {})
+                header = service_response.get('cmmMsgHeader', {})
+                
+                error_msg = header.get('errMsg', '')
+                
+                if error_msg == 'SERVICE ERROR':
+                    return None
+                
+                # OpenAPI body 처리
+                body = service_response.get('body', {})
+                items = body.get('items', {})
+                
+                if isinstance(items, dict) and 'item' in items:
+                    item = items['item']
+                else:
+                    item = items
+            else:
                 return None
             
-            # body에서 items 추출
-            body = response_data.get('body', {})
-            items = body.get('items', {})
-            
-            if isinstance(items, dict) and 'item' in items:
-                item_data = items['item']
-                if isinstance(item_data, list) and len(item_data) > 0:
-                    item = item_data[0]
-                else:
-                    item = item_data
-            else:
-                item = items
+            # item이 비어있거나 None인 경우 처리
+            if not item:
+                return None
             
             result = {
                 'success': True,
-                'result_Code': header.get('result_Code', '200'),
-                'result_Msg': header.get('result_Msg', 'OK'),
+                'result_Code': '200',
+                'result_Msg': 'OK',
                 'crop_Code': item.get('crop_Code', ''),
                 'crop_Nm': item.get('crop_Nm', ''),
                 'pre_Fert_N': item.get('pre_Fert_N', '0'),
@@ -65,263 +204,106 @@ class SoilFertilizerService:
             return None
     
     def get_farm_info(self):
-        """농장 정보 가져오기"""
-        farm_size_a = USER_DATA.get('farm_size_a', 100)  # a 단위
-        farm_size_10a = farm_size_a / 10  # 10a 단위로 변환 (10a = 1ha = 1000㎡)
-        
+        """농장 정보 가져오기 (면적 a 단위 직접 계산)"""
+        farm = USER_DATA.get('farm', {})
+        area_m2 = farm.get('area_m2', 25000)  # 기본값 25,000㎡
+        farm_size_a = area_m2 / 100  # 100㎡ = 1a
+        farm_size_10a = farm_size_a / 10  # 10a 단위로 변환
+        crops = farm.get('crops', [])
+        current_crop = crops[0] if crops else {}
+        from config.crop_codes import get_crop_code
+        crop_name = current_crop.get('cropname', '맥주보리')
+        crop_code = get_crop_code(crop_name) or '01001'
         return {
             'farm_size_a': farm_size_a,
             'farm_size_10a': farm_size_10a,
-            'crop_code': USER_DATA.get('crop', {}).get('code', '01001'),
-            'crop_name': USER_DATA.get('crop', {}).get('name', '맥주보리'),
+            'crop_code': crop_code,
+            'crop_name': crop_name,
             'soil': USER_DATA.get('soil', {})
         }
     
-    def call_fertilizer_api(self, farm_info):
-        """공공데이터 API 호출"""
-        print(f"🌐 API 호출 중... 작물: {farm_info['crop_name']} (코드: {farm_info['crop_code']})")
-        
-        # 실제 API 호출
-        try:
-            soil = farm_info['soil']
-            params = {
-                'serviceKey': self.api_key,
-                'crop_Code': farm_info['crop_code'],
-                'acid': soil.get('ph', 6.5),
-                'om': soil.get('om', 22),
-                'vldpha': soil.get('vldpha', 10),
-                'posifert_K': soil.get('posifert_K', 4),
-                'posifert_Ca': soil.get('posifert_Ca', 6),
-                'posifert_Mg': soil.get('posifert_Mg', 13),
-                'selc': soil.get('selc', 6)
-            }
-            
-            response = requests.get(self.api_url, params=params, timeout=10)
-            
-            if response.status_code == 200:
-                print("✅ API 호출 성공!")
-                parsed_data = self.parse_fertilizer_response(response.text)
-                if parsed_data:
-                    return parsed_data
-                else:
-                    print("⚠️ 응답 파싱 실패, 테스트 데이터 사용")
-                    return self._get_test_data()
-            else:
-                print(f"⚠️  API 응답 오류: {response.status_code}")
-                return self._get_test_data()
-                
-        except Exception as e:
-            print(f"⚠️ API 호출 실패: {str(e)}")
-            print("� 테스트 데이터로 진행합니다")
-            return self._get_test_data()
-    
-    def _get_test_data(self):
-        """테스트용 비료 데이터"""
-        return {
-            'pre_Fert_N': '4.9',
-            'pre_Fert_P': '24.8', 
-            'pre_Fert_K': '3.0',
-            'post_Fert_N': '3.2',
-            'post_Fert_P': '0.0',
-            'post_Fert_K': '0.0',
-            'pre_Compost_Cattl': '1500',
-            'pre_Compost_Pig': '330', 
-            'pre_Compost_Chick': '255',
-            'pre_Compost_Mix': '541'
-        }
-    
-    def display_soil_analysis(self, farm_info):
-        """토양 분석 결과 출력 (흙토람 스타일)"""
-        print("🧪 토양 분석 결과")
-        print("=" * 50)
-        
-        soil = farm_info['soil']
-        print(f"📊 토양 화학성")
-        print(f"   산도(pH): {soil.get('ph', 6.5)}")
-        print(f"   유기물(OM): {soil.get('om', 22)} g/kg")
-        print(f"   유효인산: {soil.get('vldpha', 10)} mg/kg")
-        print(f"   치환성 칼륨: {soil.get('posifert_K', 4)} cmol+/kg")
-        print(f"   치환성 칼슘: {soil.get('posifert_Ca', 6)} cmol+/kg")
-        print(f"   치환성 마그네슘: {soil.get('posifert_Mg', 13)} cmol+/kg")
-        print(f"   전기전도도: {soil.get('selc', 6)} dS/m")
-    
-    def display_fertilizer_prescription(self, fertilizer_data, farm_info):
-        """비료 처방량 출력 (흙토람 스타일)"""
-        print(f"\n💊 비료 처방량")
-        print("=" * 50)
-        
-        # 10a당 처방량
-        print(f"📊 표준 처방량 (1,000㎡당)")
-        print(f"🌱 밑거름: N-{fertilizer_data.get('pre_Fert_N', '0')}kg P-{fertilizer_data.get('pre_Fert_P', '0')}kg K-{fertilizer_data.get('pre_Fert_K', '0')}kg")
-        print(f"🌿 웃거름: N-{fertilizer_data.get('post_Fert_N', '0')}kg P-{fertilizer_data.get('post_Fert_P', '0')}kg K-{fertilizer_data.get('post_Fert_K', '0')}kg")
-        
-        # 농장 전체 필요량 계산
-        farm_size_10a = farm_info['farm_size_10a']
-        print(f"\n📊 농장 전체 필요량 ({farm_info['farm_size_a']}a)")
-        
-        # 밑거름 총량
-        base_n = float(fertilizer_data.get('pre_Fert_N', '0')) * farm_size_10a
-        base_p = float(fertilizer_data.get('pre_Fert_P', '0')) * farm_size_10a
-        base_k = float(fertilizer_data.get('pre_Fert_K', '0')) * farm_size_10a
-        
-        print(f"� 밑거름 총 필요량")
-        print(f"   질소(N): {base_n:.1f}kg")
-        print(f"   인산(P): {base_p:.1f}kg") 
-        print(f"   칼리(K): {base_k:.1f}kg")
-        
-        # 웃거름 총량
-        add_n = float(fertilizer_data.get('post_Fert_N', '0')) * farm_size_10a
-        add_p = float(fertilizer_data.get('post_Fert_P', '0')) * farm_size_10a
-        add_k = float(fertilizer_data.get('post_Fert_K', '0')) * farm_size_10a
-        
-        print(f"\n🌿 웃거름 총 필요량")
-        print(f"   질소(N): {add_n:.1f}kg")
-        print(f"   인산(P): {add_p:.1f}kg")
-        print(f"   칼리(K): {add_k:.1f}kg")
-        
-        return {
-            'base': {'N': base_n, 'P': base_p, 'K': base_k},
-            'additional': {'N': add_n, 'P': add_p, 'K': add_k}
-        }
-    
-    def display_compost_prescription(self, fertilizer_data, farm_info):
-        """퇴비 처방량 출력 (흙토람 스타일)"""
-        print(f"\n🐄 퇴비 처방량")
-        print("=" * 50)
-        
-        farm_size_10a = farm_info['farm_size_10a']
-        
-        # 농장 전체 필요량만 출력
-        cattl_total = float(fertilizer_data.get('pre_Compost_Cattl', '0')) * farm_size_10a
-        pig_total = float(fertilizer_data.get('pre_Compost_Pig', '0')) * farm_size_10a
-        chick_total = float(fertilizer_data.get('pre_Compost_Chick', '0')) * farm_size_10a
-        mix_total = float(fertilizer_data.get('pre_Compost_Mix', '0')) * farm_size_10a
-        
-        print(f"📦 농장 전체 필요량 ({farm_info['farm_size_a']}a)")
-        print(f"   우분퇴비: {cattl_total:.0f}kg ({cattl_total/1000:.1f}톤)")
-        print(f"   돈분퇴비: {pig_total:.0f}kg ({pig_total/1000:.1f}톤)")
-        print(f"   계분퇴비: {chick_total:.0f}kg ({chick_total/1000:.1f}톤)")
-        print(f"   혼합퇴비: {mix_total:.0f}kg ({mix_total/1000:.1f}톤)")
-        
-        return {
-            'cattle_compost': {'kg': cattl_total, 'tons': round(cattl_total/1000, 1)},
-            'pig_compost': {'kg': pig_total, 'tons': round(pig_total/1000, 1)},
-            'chicken_compost': {'kg': chick_total, 'tons': round(chick_total/1000, 1)},
-            'mixed_compost': {'kg': mix_total, 'tons': round(mix_total/1000, 1)}
-        }
-    
-    def calculate_compost_needs(self, fertilizer_data, farm_info):
-        """퇴비 필요량 계산 (API용)"""
-        farm_size_10a = farm_info['farm_size_10a']
-        
-        cattl_total = float(fertilizer_data.get('pre_Compost_Cattl', '0')) * farm_size_10a
-        pig_total = float(fertilizer_data.get('pre_Compost_Pig', '0')) * farm_size_10a
-        chick_total = float(fertilizer_data.get('pre_Compost_Chick', '0')) * farm_size_10a
-        mix_total = float(fertilizer_data.get('pre_Compost_Mix', '0')) * farm_size_10a
-        
-        return {
-            'cattle_compost': {'kg': cattl_total, 'tons': round(cattl_total/1000, 1)},
-            'pig_compost': {'kg': pig_total, 'tons': round(pig_total/1000, 1)},
-            'chicken_compost': {'kg': chick_total, 'tons': round(chick_total/1000, 1)},
-            'mixed_compost': {'kg': mix_total, 'tons': round(mix_total/1000, 1)}
-        }
-    
-    def calculate_total_nutrients(self, fertilizer_data, farm_info):
-        """농장 전체 양분 필요량 계산 (API용)"""
-        farm_size_10a = farm_info['farm_size_10a']
-        
-        # 밑거름 총량
-        base_n = float(fertilizer_data.get('pre_Fert_N', '0')) * farm_size_10a
-        base_p = float(fertilizer_data.get('pre_Fert_P', '0')) * farm_size_10a
-        base_k = float(fertilizer_data.get('pre_Fert_K', '0')) * farm_size_10a
-        
-        # 웃거름 총량
-        add_n = float(fertilizer_data.get('post_Fert_N', '0')) * farm_size_10a
-        add_p = float(fertilizer_data.get('post_Fert_P', '0')) * farm_size_10a
-        add_k = float(fertilizer_data.get('post_Fert_K', '0')) * farm_size_10a
-        
-        return {
-            'base': {'N': base_n, 'P': base_p, 'K': base_k},
-            'additional': {'N': add_n, 'P': add_p, 'K': add_k}
-        }
-    
-    def load_fertilizer_database(self):
-        """비료 데이터베이스 로드"""
-        try:
-            with open('data/밑거름.json', 'r', encoding='utf-8') as f:
-                base_fertilizers = json.load(f)
-            with open('data/웃거름.json', 'r', encoding='utf-8') as f:
-                additional_fertilizers = json.load(f)
-            return base_fertilizers, additional_fertilizers
-        except FileNotFoundError:
-            print("⚠️ 비료 데이터베이스 파일이 없습니다. utils/csv_to_json.py를 먼저 실행해주세요.")
-            return [], []
-    
-    def recommend_fertilizers(self, target_n, target_p, target_k, fertilizer_type="base", top_n=2):
+    def recommend_products(self, target_n, target_p, target_k, fertilizer_type="base", top_n=2):
         """NPK 기준 비료 추천"""
-        base_fertilizers, additional_fertilizers = self.load_fertilizer_database()
-        
-        if fertilizer_type == "base":
-            fertilizers = base_fertilizers
-        else:
-            fertilizers = additional_fertilizers
-        
-        if not fertilizers:
-            return []
-        
-        # 질소 함량이 있는 비료만 필터링
-        nitrogen_fertilizers = [f for f in fertilizers if float(f.get('질소', 0)) > 0]
-        
-        # NPK 비율 점수 계산
-        scored_fertilizers = []
-        for fert in nitrogen_fertilizers:
-            n_diff = abs(float(fert.get('질소', 0)) - target_n)
-            p_diff = abs(float(fert.get('인산', 0)) - target_p) 
-            k_diff = abs(float(fert.get('칼리', 0)) - target_k)
-            score = n_diff + p_diff + k_diff
-            
-            fert_copy = fert.copy()
-            fert_copy['추천점수'] = round(score, 1)
-            scored_fertilizers.append(fert_copy)
-        
-        # 점수 순 정렬
-        scored_fertilizers.sort(key=lambda x: x['추천점수'])
-        return scored_fertilizers[:top_n]
-    
-    def calculate_fertilizer_usage(self, fertilizer, target_n, target_p, target_k, total_area_10a):
-        """질소 기준 비료 사용량 계산"""
         try:
-            fert_n = float(fertilizer.get('질소', 0))
+            fertilizer_file = os.path.join(os.path.dirname(__file__), '..', 'data', 'fertilizers.json')
+            
+            if not os.path.exists(fertilizer_file):
+                return []
+            
+            with open(fertilizer_file, 'r', encoding='utf-8') as f:
+                all_fertilizers = json.load(f)
+            
+            # 단계에 따른 비료 필터링
+            filtered_fertilizers = []
+            stage_key = "basal" if fertilizer_type == "base" else "topdress"
+            
+            for fert in all_fertilizers:
+                if stage_key in fert.get("stage", []):
+                    filtered_fertilizers.append(fert)
+            
+            if not filtered_fertilizers:
+                return []
+            
+            # 질소 함량이 있는 비료만 필터링
+            nitrogen_fertilizers = [f for f in filtered_fertilizers 
+                                   if float(f.get('grade', {}).get('N', 0)) > 0]
+            
+            # NPK 비율 점수 계산
+            scored_fertilizers = []
+            for fert in nitrogen_fertilizers:
+                grade = fert.get('grade', {})
+                n_diff = abs(float(grade.get('N', 0)) - target_n)
+                p_diff = abs(float(grade.get('P2O5', 0)) - target_p) 
+                k_diff = abs(float(grade.get('K2O', 0)) - target_k)
+                score = n_diff + p_diff + k_diff
+                
+                fert_copy = fert.copy()
+                fert_copy['추천점수'] = round(score, 1)
+                scored_fertilizers.append(fert_copy)
+            
+            # 점수 순 정렬
+            scored_fertilizers.sort(key=lambda x: x['추천점수'])
+            return scored_fertilizers[:top_n]
+            
+        except Exception as e:
+            print(f"⚠️ 비료 추천 오류: {e}")
+            return []
+    
+    def get_fertilizer_usage(self, fertilizer, total_n_needed, total_p_needed, total_k_needed, farm_size_a=None):
+        """전체 농장 양분 기준 비료 사용량 반환"""
+        try:
+            # 새 구조에서 데이터 추출
+            grade = fertilizer.get('grade', {})
+            fert_n = float(grade.get('N', 0))
+            fert_p = float(grade.get('P2O5', 0))  
+            fert_k = float(grade.get('K2O', 0))
+            bag_weight = float(fertilizer.get('bag_kg', 20))
+            fertilizer_id = fertilizer.get('_id', '')
+            fertilizer_name = fertilizer.get('name', '')
+            
             if fert_n == 0:
                 return None
             
-            # 질소 기준 사용량
-            usage_per_10a = target_n / (fert_n / 100)  # kg per 1000㎡
-            total_usage = usage_per_10a * total_area_10a
+            # 질소 기준으로 총 비료 사용량 계산
+            total_usage_kg = total_n_needed / (fert_n / 100)
+            bags = total_usage_kg / bag_weight
             
-            # 포대 수 계산
-            bag_weight = float(fertilizer.get('1포대당 무게', 20))
-            bags_needed = total_usage / bag_weight
-            
-            # 실제 공급 성분
-            actual_n = total_usage * fert_n / 100
-            actual_p = total_usage * float(fertilizer.get('인산', 0)) / 100
-            actual_k = total_usage * float(fertilizer.get('칼리', 0)) / 100
-            
-            # 부족/과잉 성분
-            target_total_p = target_p * total_area_10a
-            target_total_k = target_k * total_area_10a
-            
-            shortage_p = max(0, target_total_p - actual_p)
-            shortage_k = max(0, target_total_k - actual_k)
+            # 부족분 계산
+            supplied_p = total_usage_kg * (fert_p / 100)
+            supplied_k = total_usage_kg * (fert_k / 100)
+            shortage_p = max(0, total_p_needed - supplied_p)
+            shortage_k = max(0, total_k_needed - supplied_k)
             
             return {
-                'usage_kg': round(total_usage, 1),
-                'bags': round(bags_needed, 1),
+                'fertilizer_id': fertilizer_id,
+                'fertilizer_name': fertilizer_name,
+                'usage_kg': round(total_usage_kg, 1),
+                'bags': round(bags, 1),
                 'shortage_p': round(shortage_p, 1),
                 'shortage_k': round(shortage_k, 1)
             }
-        except:
+        except Exception as e:
+            print(f"비료 사용량 계산 오류: {e}")
             return None
     
     def display_fertilizer_recommendations(self, nutrient_needs):
@@ -386,43 +368,3 @@ class SoilFertilizerService:
                     if usage['shortage_k'] > 0:
                         shortages.append(f"칼륨 {usage['shortage_k']}kg")
                     print(f"     추가필요: {', '.join(shortages)}")
-    
-    def run_soil_analysis(self):
-        """토양-비료 처방 시스템 실행 (흙토람 스타일)"""
-        print("🌾 토양-비료 처방 시스템")
-        print("=" * 60)
-        
-        # 1. 농장 정보 가져오기
-        farm_info = self.get_farm_info()
-        print(f"🏡 농장 기본정보")
-        print(f"   작물: {farm_info['crop_name']} (코드: {farm_info['crop_code']})")
-        print(f"   면적: {farm_info['farm_size_a']}a\n")
-        
-        # 2. 토양 분석 결과 출력
-        self.display_soil_analysis(farm_info)
-        
-        # 3. API 호출 및 응답 처리
-        fertilizer_data = self.call_fertilizer_api(farm_info)
-        
-        if not fertilizer_data or not fertilizer_data.get('success'):
-            print("❌ 처방 계산 실패")
-            return
-        
-        # 4. 처방 결과 출력
-        nutrient_needs = self.display_fertilizer_prescription(fertilizer_data, farm_info)
-        compost_needs = self.display_compost_prescription(fertilizer_data, farm_info)
-        
-        # 5. 비료 추천
-        self.display_fertilizer_recommendations(nutrient_needs)
-        
-        # 6. 결과 요약
-        print(f"\n📋 처방 결과 요약")
-        print("=" * 50)
-        print(f"✅ 작물: {fertilizer_data.get('crop_Nm', '맥주보리')}")
-        print(f"✅ 결과: {fertilizer_data.get('result_Msg', 'OK')}")
-        print(f"✅ 농장면적: {farm_info['farm_size_a']}a")
-
-# 테스트 실행
-if __name__ == "__main__":
-    service = SoilFertilizerService()
-    service.run_soil_analysis()

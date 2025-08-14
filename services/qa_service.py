@@ -84,12 +84,6 @@ def load_qa_chain():
     )
     
     # USER_DATA 기반 프롬프트
-    crops_info = ", ".join(USER_DATA['crop']['current_crops'])
-    growth_stages = ", ".join([f"{crop}({stage})" for crop, stage in USER_DATA['crop']['growth_stage'].items()])
-    soil = USER_DATA['soil']
-    soil_info = f"pH {soil['ph']}, 유기물 {soil['om']}g/kg, 유효인산 {soil['vldpha']}mg/kg, 칼륨 {soil['posifert_K']}cmol+/kg, 칼슘 {soil['posifert_Ca']}cmol+/kg, 마그네슘 {soil['posifert_Mg']}cmol+/kg, 전기전도도 {soil['selc']}dS/m"
-    recent_intruder = USER_DATA['intruder']['recent_incidents'][0]
-    intruder_info = f"{recent_intruder['time']}, {recent_intruder['type']}"
 
     template = f"""
 너는 작물 재배, 병충해 방제, 농업 기상 해석에 전문성을 가진 농업 전문가다. 
@@ -101,11 +95,8 @@ def load_qa_chain():
 - 예: "10a당 질소 15kg", "250a 농장에서는..."
 
 현재 사용자 농장 정보:
-- 현재 날짜: 2025년 8월 12일
-- 재배 작물: {crops_info}
-- 생육 단계: {growth_stages}
-- 토양 상태: {soil_info}
-- 최근 침입자 사건: {intruder_info}
+- 현재 날짜: 2025년 8월 14일
+- 사용자 정보 : {USER_DATA}
 
 사용자 농지 데이터는 참고만 하고, 절대 새로운 수치·사실 생성 근거로 사용하지 마,
 RAG 컨텍스트에서 동일 주제 관련 정보가 있을 때만 조언에 포함.

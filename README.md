@@ -84,45 +84,66 @@ python app.py
 
 ## 🚀 API 사용법
 
-### 다중 작물 비료 처방 추천
+
+### 단일 작물 비료 추천
 ```bash
-GET /api/fertilizer-prescription
+POST /api/fertilizer-recommendation
+Content-Type: application/json
+
+{
+  "cropName": "맥주보리",
+  "fieldId": "farm001",
+  "area_sqm": 25000
+}
 ```
 
 **응답 예시:**
 ```json
 {
-  "success": true,
-  "message": "3개 작물에 대한 비료 처방이 완료되었습니다.",
-  "weather_info": {
-    "location": "구리시",
-    "temperature": "22°C",
-    "humidity": "65%",
-    "precipitation_probability": "30%"
-  },
-  "crops": [
-    {
-      "crop_name": "맥주보리",
-      "crop_code": "01001", 
-      "growth_stage": "파종기",
-      "fertilizer_recommendations": {
-        "base_fertilizers": [
-          {
-            "product_name": "복합비료 21-17-17",
-            "usage_amount_per_a": 4.5,
-            "total_bags_needed": 2,
-            "application_method": "전면시비 후 경운"
-          }
-        ],
-        "additional_fertilizers": [...],
-        "compost_recommendations": [...]
+  "status": "success",
+  "crop": { "code": "01001", "name": "맥주보리" },
+  "field": { "id": "farm001", "area_sqm": 25000 },
+  "fertilizer": {
+    "base": [
+      {
+        "fertilizer_id": "base_002",
+        "fertilizer_name": "Eco-sol",
+        "N_ratio": 0.43,
+        "P_ratio": 0.15,
+        "K_ratio": 0.03,
+        "bags": 204.2,
+        "need_N_kg": 122.5,
+        "need_P_kg": 620.0,
+        "need_K_kg": 75.0,
+        "shortage_P_kg": 7.5,
+        "shortage_K_kg": 0,
+        "usage_kg": 4083.3
       }
-    }
-  ],
-  "farm_summary": {
-    "total_area": "250a",
-    "total_crops": 3,
-    "estimated_cost": "₩450,000"
+    ],
+    "additional": [ ... ]
+  },
+  "compost": {
+    "cattle_kg": 37500.0,
+    "chicken_kg": 6375.0,
+    "mixed_kg": 12200.0,
+    "pig_kg": 8250.0
+  }
+}
+```
+
+### 현재 날씨 정보
+```bash
+GET /api/weather/current
+```
+**응답 예시:**
+```json
+{
+  "status": "success",
+  "data": {
+    "temperature": 26.4,
+    "humidity": 90.0,
+    "precipitation": 0.0,
+    "weather": "sunny"
   }
 }
 ```

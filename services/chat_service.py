@@ -42,40 +42,45 @@ def initialize_chains():
 def chat():
     """채팅 엔드포인트"""
     global qa_chain, routing_chain
-    
     try:
         # 체인이 초기화되지 않았으면 초기화
         if qa_chain is None or routing_chain is None:
             initialize_chains()
-            
         data = request.get_json()
-        
+        from config.user_data import USER_DATA
         if not data or 'message' not in data:
             return jsonify({
                 "status": "error",
                 "message": "메시지가 필요합니다."
             }), 400
-        
         user_message = data['message'].strip()
-        
+    # 프롬프트에서 USER_DATA 활용 가능
+    # 예시: prompt = f"{user_message}\n[USER_DATA]: {USER_DATA}"
+    # 주요 정보 예시
+    # crops = USER_DATA.get('current_crops', [])
+    # weather = USER_DATA.get('weather', {})
+    # soil = USER_DATA.get('soil', {})
+    # farm = USER_DATA.get('farm', {})
+    # user = USER_DATA.get('user', {})
+    # location = USER_DATA.get('location', {})
+    # 프롬프트 생성 시 위 정보를 자유롭게 활용
         if not user_message:
             return jsonify({
                 "status": "error", 
                 "message": "빈 메시지는 처리할 수 없습니다."
             }), 400
-        
         # 라우팅 결정
         routing_input = {
             "question": user_message,
-            "crops": ", ".join(USER_DATA['crop']['current_crops']),
-            "ph": USER_DATA['soil']['ph'],
-            "om": USER_DATA['soil']['om'],                          # 유기물
-            "vldpha": USER_DATA['soil']['vldpha'],                  # 유효인산
-            "posifert_K": USER_DATA['soil']['posifert_K'],          # 칼륨
-            "posifert_Ca": USER_DATA['soil']['posifert_Ca'],        # 칼슘
-            "posifert_Mg": USER_DATA['soil']['posifert_Mg'],        # 마그네슘
-            "selc": USER_DATA['soil']['selc'],                      # 전기전도도
-            "intruder_count": len(USER_DATA['intruder']['recent_incidents'])
+            "crops": ", ".join([crop.get('cropname', '') for crop in USER_DATA.get('farm', {}).get('crops', [])]),
+            "ph": USER_DATA['soil'].get('ph', None),
+            "om": USER_DATA['soil'].get('om', None),
+            "vldpha": USER_DATA['soil'].get('vldpha', None),
+            "posifert_K": USER_DATA['soil'].get('posifert_K', None),
+            "posifert_Ca": USER_DATA['soil'].get('posifert_Ca', None),
+            "posifert_Mg": USER_DATA['soil'].get('posifert_Mg', None),
+            "selc": USER_DATA['soil'].get('selc', None),
+            "intruder_count": len(USER_DATA.get('intruder', {}).get('recent_incidents', []))
         }
         
         routing_result = routing_chain.invoke(routing_input)
