@@ -38,7 +38,7 @@ def initialize_chains():
     routing_chain = create_routing_chain(llm)
 
 
-@chat_bp.route('/chat', methods=['POST'])
+@chat_bp.route('/api/chat', methods=['POST'])
 def chat():
     """채팅 엔드포인트"""
     global qa_chain, routing_chain
