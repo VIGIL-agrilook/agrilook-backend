@@ -8,7 +8,7 @@ from langchain_community.retrievers import BM25Retriever
 from langchain.retrievers import EnsembleRetriever
 from config.user_data import USER_DATA
 from config.crop_codes import get_crop_code, get_crop_name
-
+from services.soil_fertilizer_cache import fertilizer_cache
 
 def ko_basic_tokenizer(text):
     """한국어 기본 토크나이저 - 공백과 한글 문자 기준"""
@@ -97,6 +97,7 @@ def load_qa_chain():
 현재 사용자 농장 정보:
 - 현재 날짜: 2025년 8월 14일
 - 사용자 정보 : {USER_DATA}
+- 사용자 농장 비료 추천 :{fertilizer_cache}
 
 사용자 농지 데이터는 참고만 하고, 절대 새로운 수치·사실 생성 근거로 사용하지 마,
 RAG 컨텍스트에서 동일 주제 관련 정보가 있을 때만 조언에 포함.
@@ -157,3 +158,8 @@ def format_source_documents(docs) -> list:
         formatted_sources.append(f"{i}. {source_name} (p.{page})")
     
     return formatted_sources
+
+
+def get_fertilizer_prompt(farm_id, cropname):
+    key = f"{farm_id}_{cropname}"
+    return f"추천 결과: {fertilizer_cache.get(key)}"

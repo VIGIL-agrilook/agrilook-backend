@@ -9,3 +9,9 @@ def health_check():
         "message": "농업 AI 시스템이 정상 작동 중입니다.",
         "version": "1.0.0"
     })
+
+health_check = Blueprint('health_check', __name__)
+
+@health_check.route('/health')
+def health():
+    return 'OK'

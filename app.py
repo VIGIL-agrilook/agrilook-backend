@@ -7,17 +7,21 @@ from routes.fertilizer import fertilizer_bp
 from routes.fertilizer_raw import fertilizer_raw_bp
 from routes.weather import weather_bp
 from routes.chat import chat_bp
+from routes.health import health_bp
+from config.user_data import USER_DATA
+from services.soil_fertilizer_cache import initialize_fertilizer_cache
 
 load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-
+app.register_blueprint(health_bp)
 app.register_blueprint(fertilizer_bp)
 app.register_blueprint(fertilizer_raw_bp)
 app.register_blueprint(weather_bp)
 app.register_blueprint(chat_bp)
 
 if __name__ == '__main__':
+    initialize_fertilizer_cache()
     port = int(os.environ.get('PORT', 5001))
     app.run(host='0.0.0.0', port=port, debug=True)

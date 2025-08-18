@@ -2,7 +2,6 @@ from flask import Blueprint, request, jsonify
 from config.user_data import USER_DATA
 from services.soil_fertilizer_service import SoilFertilizerService
 from utils.crop_mapper import get_crop_code
-import os, json
 import xml.etree.ElementTree as ET
 
 fertilizer_bp = Blueprint('fertilizer', __name__)

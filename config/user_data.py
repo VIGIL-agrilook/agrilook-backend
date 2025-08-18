@@ -19,9 +19,9 @@ SAMPLE_USER = {
 SAMPLE_FARM = {
     "_id": "farm001",
     "name": "김농부네 농장",
-    "address": "경기도 구리시 인창동 123-45",
+    "address": "경기도 구리시 교문동",
     "stn": 108,
-    "area_m2": 25000,  # 25,000㎡ = 250a
+    "area_m2": 250,  # 25,000㎡ = 250a
     "coord": { 
         "lon": 127.1295,  # 구리시 경도
         "lat": 37.5943    # 구리시 위도
@@ -36,7 +36,7 @@ SAMPLE_FARM = {
         },
         {
             "_id": "crop002", 
-            "cropname": "콩",
+            "cropname": "토마토",
             "planted_at": "2025-05-15T00:00:00Z", 
             "status": "growing"
         },

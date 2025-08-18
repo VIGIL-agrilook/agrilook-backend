@@ -116,3 +116,7 @@ htmlcov/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+
+fertilizer_db_import.py
+*.pdf
