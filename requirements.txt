@@ -26,3 +26,6 @@ openai==1.99.9
 
 # 날씨 및 농업 데이터 처리
 python-dateutil>=2.8.0
+
+# MongoDB
+pymongo==4.7.2
