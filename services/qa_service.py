@@ -1,5 +1,6 @@
 import os
 import re
+import logging
 from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
 from langchain.chains.retrieval_qa.base import RetrievalQA
@@ -9,6 +10,8 @@ from langchain.retrievers import EnsembleRetriever
 from config.user_data import USER_DATA
 from config.crop_codes import get_crop_code, get_crop_name
 from services.soil_fertilizer_cache import fertilizer_cache
+
+logger = logging.getLogger(__name__)
 
 def ko_basic_tokenizer(text):
     """한국어 기본 토크나이저 - 공백과 한글 문자 기준"""
@@ -69,7 +72,7 @@ def load_qa_chain():
             retriever = vector_retriever
         
     except Exception as e:
-        print(f"하이브리드 검색 설정 중 오류: {str(e)}")
+        logger.exception("하이브리드 검색 설정 중 오류")
         retriever = vector_retriever
     
     # LLM 설정

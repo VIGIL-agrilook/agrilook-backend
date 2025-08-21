@@ -1,8 +1,7 @@
 from flask import Blueprint, request, jsonify
 from config.user_data import USER_DATA
 from services.soil_fertilizer_service import SoilFertilizerService
-from utils.crop_mapper import get_crop_code
-import xml.etree.ElementTree as ET
+from config.crop_codes import get_crop_code
 
 fertilizer_bp = Blueprint('fertilizer', __name__)
 
@@ -24,52 +23,19 @@ def get_fertilizer_recommendation():
         'farm_size_a': farm_size_a
     }
     service = SoilFertilizerService()
-    raw_result = service.get_raw_public_api_result(farm_info)
-    root = ET.fromstring(raw_result)
-    item = root.find('.//item')
-    def get_float(tag):
-        if item is None:
-            return 0.0
-        val = item.findtext(tag)
-        try:
-            return float(val)
-        except:
-            return 0.0
-    def get_text(tag, default=None):
-        if item is None:
-            return default
-        return item.findtext(tag, default)
-    # 퇴비 4종류
+    # 표준 파서/계산 사용
+    prescription = service.fetch_fertilizer_api(farm_info)
     total_area_10a = area_sqm / 1000
-    compost = {
-        "cattle_kg": get_float("pre_Compost_Cattl") * total_area_10a,
-        "chicken_kg": get_float("pre_Compost_Chick") * total_area_10a,
-        "mixed_kg": get_float("pre_Compost_Mix") * total_area_10a,
-        "pig_kg": get_float("pre_Compost_Pig") * total_area_10a
-    }
-
+    compost = service.get_compost_amounts(prescription, {"farm_size_10a": total_area_10a})
 
     # 비료 추천 로직
-    service = SoilFertilizerService()
     base_fertilizers = []
     topdress_fertilizers = []
-    composts = []
 
-    # 처방 API 호출 및 필요량 추출
-    prescription = service.fetch_fertilizer_api(farm_info)
-
+    # 처방 API 호출 및 필요량 추출 (위에서 이미 호출됨)
     from utils.fertilizer_recommender import recommend_fertilizers
     base_fertilizers = recommend_fertilizers(service, prescription, "base", 3)
     topdress_fertilizers = recommend_fertilizers(service, prescription, "topdress", 3)
-
-    # 퇴비 추천
-    for comp in compost.items():
-        composts.append({
-            "name": comp[0],
-            "amount": comp[1],
-            "unit": "kg",
-            "type": "compost"
-        })
 
     # 작물 코드
     crop_code = get_crop_code(crop_name)
@@ -114,7 +80,7 @@ def get_fertilizer_recommendation():
         "_id": farm.get("_id", "farm001"),
         "crop": {
             "code": crop_code,
-            "name": get_text("crop_Nm", crop_name)
+            "name": prescription.get("crop_Nm", crop_name)
         },
         "compost": {
             "cattle_kg": compost["cattle_kg"],

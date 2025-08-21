@@ -3,6 +3,9 @@ import requests
 import xmltodict
 from dotenv import load_dotenv
 import sys
+import re
+import traceback
+import logging
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config.user_data import USER_DATA
 from config.crop_codes import get_crop_code
@@ -11,6 +14,7 @@ import math
 
 
 load_dotenv()
+logger = logging.getLogger(__name__)
 
 class SoilFertilizerService:
     def __init__(self):
@@ -18,6 +22,34 @@ class SoilFertilizerService:
         if not self.api_key:
             raise RuntimeError("FERTILIZER_API_KEY not set in environment")
         self.api_url = "http://apis.data.go.kr/1390802/SoilEnviron/FrtlzrUseExp/getSoilFrtlzrExprnInfo"
+        self.debug = os.getenv('FERTILIZER_API_DEBUG', '0') == '1'
+
+    # ====== 내부 유틸 ======
+    def _parse_number_or_range(self, value, default=None):
+        if value is None:
+            return default
+        if isinstance(value, (int, float)):
+            return float(value)
+        if isinstance(value, str):
+            nums = re.findall(r"[-+]?\d*\.?\d+", value.replace(",", ""))
+            if not nums:
+                return default
+            try:
+                floats = [float(n) for n in nums]
+            except Exception:
+                return default
+            if len(floats) == 1:
+                return floats[0]
+            return sum(floats[:2]) / 2.0
+        return default
+
+    def _soil_value(self, soil: dict, candidate_keys, default=None):
+        for k in candidate_keys:
+            if k in soil and soil.get(k) not in (None, ""):
+                return self._parse_number_or_range(soil.get(k), default)
+        return default
+
+    # (구) 라우트 호환 유틸은 제거되었습니다.
 
     # ====== 공개 메인 ======
     def get_recommendation_bundle(self):
@@ -70,24 +102,81 @@ class SoilFertilizerService:
     def fetch_fertilizer_api(self, farm_info):
         """흙토람 체험 API 호출 → dict (단위: kg/10a)"""
         soil = farm_info['soil']
+        # 현실적인 안전 기본값(센서 부재 시 재시도용)
+        typical = {
+            'acid': 6.5,     # pH
+            'om': 22.0,      # g/kg
+            'vldpha': 120.0, # mg/kg (유효인산)
+            'posifert_K': 0.55, # cmol+/kg (치환성칼리)
+            'posifert_Ca': 6.8, # cmol+/kg
+            'posifert_Mg': 2.1, # cmol+/kg
+            'selc': 1.2,        # dS/m (EC)
+        }
+
         params = {
             'serviceKey': self.api_key,
             'crop_Code': farm_info.get('crop_code'),
-            'acid': soil.get('ph', 6.5),
-            'om': soil.get('om', 22),
-            'vldpha': soil.get('vldpha', 10),
-            'posifert_K': soil.get('posifert_K', 4),
-            'posifert_Ca': soil.get('posifert_Ca', 6),
-            'posifert_Mg': soil.get('posifert_Mg', 13),
-            'selc': soil.get('selc', 6),
+            'acid': self._soil_value(soil, ['ph', 'pH'], typical['acid']),
+            'om': self._soil_value(soil, ['om', 'OM'], typical['om']),
+            'vldpha': self._soil_value(soil, ['vldpha', 'P'], typical['vldpha']),
+            'posifert_K': self._soil_value(soil, ['posifert_K', 'K'], typical['posifert_K']),
+            'posifert_Ca': self._soil_value(soil, ['posifert_Ca', 'Ca'], typical['posifert_Ca']),
+            'posifert_Mg': self._soil_value(soil, ['posifert_Mg', 'Mg'], typical['posifert_Mg']),
+            'selc': self._soil_value(soil, ['selc', 'EC'], typical['selc']),
         }
-        r = requests.get(self.api_url, params=params, timeout=10)
-        # 디버깅이 필요하면 아래 두 줄 주석 해제
-        # print("API 요청 URL:", r.url)
-        # print("API 응답:", r.text)
-        r.raise_for_status()
-        parsed = self.parse_fertilizer_response(r.text)
-        return parsed if parsed and parsed.get('success') else {}
+        try:
+            if self.debug:
+                safe_params = dict(params)
+                if 'serviceKey' in safe_params:
+                    safe_params['serviceKey'] = '***'
+                logger.debug("[FERT_API] params: %s", safe_params)
+            r = requests.get(self.api_url, params=params, timeout=10)
+            if self.debug:
+                logger.debug("[FERT_API] status: %s, bytes: %s", r.status_code, len(r.text))
+            r.raise_for_status()
+            parsed = self.parse_fertilizer_response(r.text)
+            ok = bool(parsed and parsed.get('success'))
+            if self.debug:
+                logger.debug("[FERT_API] parsed success: %s", ok)
+                if not ok:
+                    # 응답 전문을 일부 노출해 원인 파악
+                    snippet = r.text[:500]
+                    logger.debug("[FERT_API] response snippet: %s", snippet)
+            if ok:
+                return parsed
+
+            # 재시도: 전부 전형값으로 강제
+            retry_params = {
+                'serviceKey': self.api_key,
+                'crop_Code': farm_info.get('crop_code'),
+                'acid': typical['acid'],
+                'om': typical['om'],
+                'vldpha': typical['vldpha'],
+                'posifert_K': typical['posifert_K'],
+                'posifert_Ca': typical['posifert_Ca'],
+                'posifert_Mg': typical['posifert_Mg'],
+                'selc': typical['selc'],
+            }
+            if self.debug:
+                safe_retry_params = dict(retry_params)
+                if 'serviceKey' in safe_retry_params:
+                    safe_retry_params['serviceKey'] = '***'
+                logger.debug("[FERT_API] RETRY with typical params: %s", safe_retry_params)
+            r2 = requests.get(self.api_url, params=retry_params, timeout=10)
+            if self.debug:
+                logger.debug("[FERT_API] retry status: %s, bytes: %s", r2.status_code, len(r2.text))
+            r2.raise_for_status()
+            parsed2 = self.parse_fertilizer_response(r2.text)
+            ok2 = bool(parsed2 and parsed2.get('success'))
+            if self.debug:
+                logger.debug("[FERT_API] retry parsed success: %s", ok2)
+                if not ok2:
+                    logger.debug("[FERT_API] retry response snippet: %s", r2.text[:500])
+            return parsed2 if ok2 else {}
+        except Exception as e:
+            if self.debug:
+                logger.exception("[FERT_API] ERROR during fetch")
+            return {}
 
     def parse_fertilizer_response(self, xml_content):
         """XML → dict (키 대소문자 혼용 대비)"""
@@ -133,7 +222,9 @@ class SoilFertilizerService:
                 'pre_Compost_Mix':   g(item, 'pre_Compost_Mix'),
             }
             return result
-        except Exception:
+        except Exception as e:
+            if getattr(self, 'debug', False):
+                logger.exception("[FERT_API] parse error")
             return None
 
     # ====== 면적/요구량 계산 ======

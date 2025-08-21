@@ -4,6 +4,7 @@
 """
 import os
 import requests
+import logging
 from config.user_data import USER_DATA
 
 class WeatherService:
@@ -60,3 +61,14 @@ class WeatherService:
         }
 
 weather_service = WeatherService()
+
+
+def initialize_weather_data():
+    """앱 시작 시 1회 현재 날씨를 USER_DATA에 반영"""
+    try:
+        station = USER_DATA.get("location", {}).get("station")
+        data = weather_service.get_current_weather(station)
+        USER_DATA["weather"] = data if data else {}
+        logging.info("Weather initialized for station %s", station)
+    except Exception as e:
+        logging.error("Failed to initialize weather: %s", e)

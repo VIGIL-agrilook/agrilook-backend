@@ -1,8 +1,10 @@
-import sys, os, copy, traceback
+import sys, os, copy, traceback, logging
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config.user_data import USER_DATA
 from services.soil_fertilizer_service import SoilFertilizerService
+
+logger = logging.getLogger(__name__)
 
 fertilizer_cache = {}
 
@@ -46,7 +48,7 @@ def initialize_fertilizer_cache():
                 "message": f"{e.__class__.__name__}: {e}"
             }
             # 디버깅이 필요하면 로그 출력
-            traceback.print_exc()
+            logger.exception("Fertilizer cache build failed for %s", cache_key)
         finally:
             # 폴백 경로를 탔을 때만 복구 (build_front_payload 경로는 USER_DATA 미변경)
             if not hasattr(service, "build_front_payload"):

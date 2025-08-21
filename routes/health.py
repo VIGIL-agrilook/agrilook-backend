@@ -10,8 +10,3 @@ def health_check():
         "version": "1.0.0"
     })
 
-health_check = Blueprint('health_check', __name__)
-
-@health_check.route('/health')
-def health():
-    return 'OK'

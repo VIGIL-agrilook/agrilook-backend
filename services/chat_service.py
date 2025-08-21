@@ -71,16 +71,7 @@ def chat():
             }), 400
         # 라우팅 결정
         routing_input = {
-            "question": user_message,
-            "crops": ", ".join([crop.get('cropname', '') for crop in USER_DATA.get('farm', {}).get('crops', [])]),
-            "ph": USER_DATA['soil'].get('ph', None),
-            "om": USER_DATA['soil'].get('om', None),
-            "vldpha": USER_DATA['soil'].get('vldpha', None),
-            "posifert_K": USER_DATA['soil'].get('posifert_K', None),
-            "posifert_Ca": USER_DATA['soil'].get('posifert_Ca', None),
-            "posifert_Mg": USER_DATA['soil'].get('posifert_Mg', None),
-            "selc": USER_DATA['soil'].get('selc', None),
-            "intruder_count": len(USER_DATA.get('intruder', {}).get('recent_incidents', []))
+            "question": user_message
         }
         
         routing_result = routing_chain.invoke(routing_input)
