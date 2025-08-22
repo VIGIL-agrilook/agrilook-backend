@@ -11,6 +11,7 @@ from config.user_data import USER_DATA
 from services.routing_service import create_routing_chain, answer_without_retrieval
 from services.qa_service import load_qa_chain, format_source_documents
 from services.db_init import initialize_user_data_from_db
+from services.soil_fertilizer_cache import initialize_fertilizer_cache
 
 chat_bp = Blueprint('chat', __name__)
 
@@ -72,6 +73,11 @@ def chat():
                     farm_id=os.getenv("FARM_ID"),
                     user_email=os.getenv("USER_EMAIL"),
                 )
+                # USER_DATA 갱신 후 비료 캐시도 최신 작물 기준으로 재구축
+                try:
+                    initialize_fertilizer_cache()
+                except Exception as ce:
+                    logging.warning("[chat] Failed to rebuild fertilizer cache: %s", ce)
                 logging.info("[chat] USER_DATA refreshed from DB for request")
         except Exception as e:
             logging.warning("[chat] Failed to refresh USER_DATA from DB: %s", e)
