@@ -7,6 +7,7 @@ from routes.fertilizer import fertilizer_bp
 from routes.weather import weather_bp
 from routes.chat import chat_bp
 from routes.health import health_bp
+from routes.soil import soil_bp
 from services.soil_fertilizer_cache import initialize_fertilizer_cache
 from services.weather_service import initialize_weather_data
 from services.db_init import initialize_user_data_from_db
@@ -24,6 +25,7 @@ app.register_blueprint(health_bp)
 app.register_blueprint(fertilizer_bp)
 app.register_blueprint(weather_bp)
 app.register_blueprint(chat_bp)
+app.register_blueprint(soil_bp)
 
 if __name__ == '__main__':
     # 데이터 소스 선택: env DATA_SOURCE=cosmos 일 때 CosmosDB에서 로드
