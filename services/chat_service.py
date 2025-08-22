@@ -5,10 +5,12 @@
 from flask import Blueprint, request, jsonify
 from langchain_openai import ChatOpenAI
 import os
+import logging
 
 from config.user_data import USER_DATA
 from services.routing_service import create_routing_chain, answer_without_retrieval
 from services.qa_service import load_qa_chain, format_source_documents
+from services.db_init import initialize_user_data_from_db
 
 chat_bp = Blueprint('chat', __name__)
 
@@ -30,6 +32,19 @@ def initialize_chains():
         base_url=base_url,
         api_key=adotx_api_key
     )
+    
+    # DB 기반 USER_DATA를 사용하는 경우, 체인 로드 전에 최신값으로 초기화
+    data_source = os.getenv("DATA_SOURCE", "local").lower()
+    if data_source in ("cosmos", "mongo", "mongodb"):
+        try:
+            initialize_user_data_from_db(
+                user_id=os.getenv("USER_ID"),
+                farm_id=os.getenv("FARM_ID"),
+                user_email=os.getenv("USER_EMAIL"),
+            )
+            logging.info("[chat] USER_DATA initialized from DB before chain setup")
+        except Exception as e:
+            logging.warning("[chat] Failed to initialize USER_DATA from DB: %s", e)
     
     # QA 체인 로드
     qa_chain = load_qa_chain()
