@@ -2,16 +2,44 @@ from flask import Blueprint, request, jsonify
 from config.user_data import USER_DATA
 from services.soil_fertilizer_service import SoilFertilizerService
 from config.crop_codes import get_crop_code
+from services.db_init import initialize_user_data_from_db
 
 fertilizer_bp = Blueprint('fertilizer', __name__)
 
 @fertilizer_bp.route('/api/fertilizer-recommendation', methods=['POST'])
 def get_fertilizer_recommendation():
     data = request.get_json() if request.is_json else {}
-    crop_name = data.get('cropname', USER_DATA.get('crop', {}).get('name', '맥주보리'))
-    field_id = data.get('farmid', 'farm001')
+
+    # 요청 시 DB 기반 USER_DATA 최신화 (환경 변수로 제어)
+    try:
+        import os
+        data_source = os.getenv("DATA_SOURCE", "local").lower()
+        if data_source in ("cosmos", "mongo", "mongodb"):
+            initialize_user_data_from_db(
+                user_id=os.getenv("USER_ID"),
+                farm_id=os.getenv("FARM_ID"),
+                user_email=os.getenv("USER_EMAIL"),
+            )
+    except Exception:
+        # 실패 시 로컬 USER_DATA 그대로 사용
+        pass
+
+    # cropname 기본값: USER_DATA의 현재 농장 작물 목록 첫 번째 항목
+    farm_crops = USER_DATA.get('farm', {}).get('crops', [])
+    default_cropname = (farm_crops[0].get('cropname') if farm_crops else None)
+    crop_name = data.get('cropname', default_cropname)
+
+    # farmid 기본값: USER_DATA의 현재 농장 _id
+    default_farm_id = USER_DATA.get('farm', {}).get('_id', 'farm001')
+    field_id = data.get('farmid', default_farm_id)
     farm_list = USER_DATA.get('farms', [])
     farm = next((f for f in farm_list if f.get('_id') == field_id), USER_DATA.get('farm', {}))
+
+    if not crop_name:
+        return jsonify({
+            "status": "error",
+            "message": "작물명이 필요합니다(cropname). USER_DATA 또는 요청 본문에 작물명을 제공하세요."
+        }), 400
     area_sqm = farm.get('area_m2', USER_DATA.get('farm_size_a', 250) * 100)
     soil_data = farm.get('soil', USER_DATA.get('soil', {}))
     farm_size_a = area_sqm / 100

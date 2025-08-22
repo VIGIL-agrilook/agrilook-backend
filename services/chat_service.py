@@ -62,6 +62,19 @@ def chat():
         if qa_chain is None or routing_chain is None:
             initialize_chains()
         data = request.get_json()
+
+        # 요청 시점에 DB 기반 USER_DATA 최신화 (환경 변수로 제어)
+        try:
+            data_source = os.getenv("DATA_SOURCE", "local").lower()
+            if data_source in ("cosmos", "mongo", "mongodb"):
+                initialize_user_data_from_db(
+                    user_id=os.getenv("USER_ID"),
+                    farm_id=os.getenv("FARM_ID"),
+                    user_email=os.getenv("USER_EMAIL"),
+                )
+                logging.info("[chat] USER_DATA refreshed from DB for request")
+        except Exception as e:
+            logging.warning("[chat] Failed to refresh USER_DATA from DB: %s", e)
         from config.user_data import USER_DATA
         if not data or 'message' not in data:
             return jsonify({
