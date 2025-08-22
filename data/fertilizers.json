@@ -1,442 +1,2238 @@
 [
   {
-    "_id": "base_001",
     "name": "21플러스",
-    "stage": ["basal"],
+    "stage": [
+      "basal"
+    ],
     "grade": {
-      "N": 21,
-      "P2O5": 11,
-      "K2O": 12
+      "N": 21.0,
+      "P2O5": 11.0,
+      "K2O": 12.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "base_001"
   },
   {
-    "_id": "base_002",
     "name": "Eco-sol",
-    "stage": ["basal"],
+    "stage": [
+      "basal"
+    ],
     "grade": {
-      "N": 3,
-      "P2O5": 15,
-      "K2O": 43
+      "N": 3.0,
+      "P2O5": 15.0,
+      "K2O": 43.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "base_002"
   },
   {
-    "_id": "base_003",
     "name": "NK+인(엔케이플러스인)",
-    "stage": ["basal"],
+    "stage": [
+      "basal"
+    ],
     "grade": {
-      "N": 18,
-      "P2O5": 1,
-      "K2O": 15
+      "N": 18.0,
+      "P2O5": 1.0,
+      "K2O": 15.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "base_003"
   },
   {
-    "_id": "base_004",
     "name": "NPK PLUS",
-    "stage": ["basal"],
+    "stage": [
+      "basal"
+    ],
     "grade": {
-      "N": 12,
-      "P2O5": 2,
-      "K2O": 40
+      "N": 12.0,
+      "P2O5": 2.0,
+      "K2O": 40.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "base_004"
   },
   {
-    "_id": "base_005",
     "name": "S-Feed",
-    "stage": ["basal"],
+    "stage": [
+      "basal"
+    ],
     "grade": {
-      "N": 9,
-      "P2O5": 11,
-      "K2O": 37
+      "N": 9.0,
+      "P2O5": 11.0,
+      "K2O": 37.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "base_005"
   },
   {
-    "_id": "base_006",
     "name": "고구마PNS15",
-    "stage": ["basal"],
+    "stage": [
+      "basal"
+    ],
     "grade": {
-      "N": 6,
-      "P2O5": 5,
-      "K2O": 13
+      "N": 6.0,
+      "P2O5": 5.0,
+      "K2O": 13.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "base_006"
   },
   {
-    "_id": "base_007",
     "name": "고구마전용",
-    "stage": ["basal"],
+    "stage": [
+      "basal"
+    ],
     "grade": {
-      "N": 7,
-      "P2O5": 7,
-      "K2O": 18
+      "N": 7.0,
+      "P2O5": 7.0,
+      "K2O": 18.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "base_007"
   },
   {
-    "_id": "base_008",
     "name": "고추고형비료",
-    "stage": ["basal"],
+    "stage": [
+      "basal"
+    ],
     "grade": {
-      "N": 15,
-      "P2O5": 6,
-      "K2O": 8
+      "N": 15.0,
+      "P2O5": 6.0,
+      "K2O": 8.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "base_008"
   },
   {
-    "_id": "base_009",
     "name": "고추전용",
-    "stage": ["basal"],
+    "stage": [
+      "basal"
+    ],
     "grade": {
-      "N": 11,
-      "P2O5": 6,
-      "K2O": 8
+      "N": 11.0,
+      "P2O5": 6.0,
+      "K2O": 8.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "base_009"
   },
   {
-    "_id": "base_010",
     "name": "고추특호",
-    "stage": ["basal"],
+    "stage": [
+      "basal"
+    ],
     "grade": {
-      "N": 12,
-      "P2O5": 6,
-      "K2O": 5
+      "N": 12.0,
+      "P2O5": 6.0,
+      "K2O": 5.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "base_010"
   },
   {
-    "_id": "base_011",
     "name": "골드고형비료",
-    "stage": ["basal"],
+    "stage": [
+      "basal"
+    ],
     "grade": {
-      "N": 15,
-      "P2O5": 4,
-      "K2O": 10
+      "N": 15.0,
+      "P2O5": 4.0,
+      "K2O": 10.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "base_011"
   },
   {
-    "_id": "base_012",
     "name": "골드측조",
-    "stage": ["basal"],
+    "stage": [
+      "basal"
+    ],
     "grade": {
-      "N": 28,
-      "P2O5": 8,
-      "K2O": 9
+      "N": 28.0,
+      "P2O5": 8.0,
+      "K2O": 9.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "base_012"
   },
   {
-    "_id": "base_013",
     "name": "과수특호(사과,배,감,복숭아)",
-    "stage": ["basal"],
+    "stage": [
+      "basal"
+    ],
     "grade": {
-      "N": 15,
-      "P2O5": 6,
-      "K2O": 12
+      "N": 15.0,
+      "P2O5": 6.0,
+      "K2O": 12.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "base_013"
   },
   {
-    "_id": "base_014",
     "name": "과일채소나라(고추, 마늘, 사과)",
-    "stage": ["basal"],
+    "stage": [
+      "basal"
+    ],
     "grade": {
-      "N": 12,
-      "P2O5": 5,
-      "K2O": 7
+      "N": 12.0,
+      "P2O5": 5.0,
+      "K2O": 7.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "base_014"
   },
   {
-    "_id": "base_015",
     "name": "광분해 한번에아리커",
-    "stage": ["basal"],
+    "stage": [
+      "basal"
+    ],
     "grade": {
-      "N": 21,
-      "P2O5": 10,
-      "K2O": 11
+      "N": 21.0,
+      "P2O5": 10.0,
+      "K2O": 11.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "base_015"
   },
   {
-    "_id": "base_016",
     "name": "논에콩",
-    "stage": ["basal"],
+    "stage": [
+      "basal"
+    ],
     "grade": {
-      "N": 5,
-      "P2O5": 16,
-      "K2O": 15
+      "N": 5.0,
+      "P2O5": 16.0,
+      "K2O": 15.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "base_016"
   },
   {
-    "_id": "base_017",
     "name": "논편한 원타임 골드",
-    "stage": ["basal"],
+    "stage": [
+      "basal"
+    ],
     "grade": {
-      "N": 20,
-      "P2O5": 7,
-      "K2O": 8
+      "N": 20.0,
+      "P2O5": 7.0,
+      "K2O": 8.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "base_017"
   },
   {
-    "_id": "base_018",
     "name": "논편한-올코팅",
-    "stage": ["basal"],
+    "stage": [
+      "basal"
+    ],
     "grade": {
-      "N": 31,
-      "P2O5": 6,
-      "K2O": 8
+      "N": 31.0,
+      "P2O5": 6.0,
+      "K2O": 8.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "base_018"
   },
   {
-    "_id": "base_019",
     "name": "논편한-원타임",
-    "stage": ["basal"],
+    "stage": [
+      "basal"
+    ],
     "grade": {
-      "N": 29,
-      "P2O5": 4,
-      "K2O": 6
+      "N": 29.0,
+      "P2O5": 4.0,
+      "K2O": 6.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "base_019"
   },
   {
-    "_id": "base_020",
     "name": "단번에올코팅",
-    "stage": ["basal"],
+    "stage": [
+      "basal"
+    ],
     "grade": {
-      "N": 30,
-      "P2O5": 8,
-      "K2O": 7
+      "N": 30.0,
+      "P2O5": 8.0,
+      "K2O": 7.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "base_020"
   },
   {
-    "_id": "base_021",
     "name": "단한번",
-    "stage": ["basal"],
+    "stage": [
+      "basal"
+    ],
     "grade": {
-      "N": 18,
-      "P2O5": 7,
-      "K2O": 9
+      "N": 18.0,
+      "P2O5": 7.0,
+      "K2O": 9.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "base_021"
   },
   {
-    "_id": "base_022",
     "name": "단한번OK(완효성원예)",
-    "stage": ["basal"],
+    "stage": [
+      "basal"
+    ],
     "grade": {
-      "N": 13,
-      "P2O5": 7,
-      "K2O": 8
+      "N": 13.0,
+      "P2O5": 7.0,
+      "K2O": 8.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "base_022"
   },
   {
-    "_id": "base_023",
     "name": "단한포24(완효성)",
-    "stage": ["basal"],
+    "stage": [
+      "basal"
+    ],
     "grade": {
-      "N": 24,
-      "P2O5": 7,
-      "K2O": 9
+      "N": 24.0,
+      "P2O5": 7.0,
+      "K2O": 9.0
     },
-    "bag_kg": 15
+    "bag_kg": 15.0,
+    "_id": "base_023"
   },
   {
-    "_id": "base_024",
     "name": "대풍PNS15(원예)",
-    "stage": ["basal"],
+    "stage": [
+      "basal"
+    ],
     "grade": {
-      "N": 13,
-      "P2O5": 6,
-      "K2O": 6
+      "N": 13.0,
+      "P2O5": 6.0,
+      "K2O": 6.0
     },
-    "bag_kg": 15
+    "bag_kg": 15.0,
+    "_id": "base_024"
   },
   {
-    "_id": "base_025",
     "name": "더존(원예)",
-    "stage": ["basal"],
+    "stage": [
+      "basal"
+    ],
     "grade": {
-      "N": 13,
-      "P2O5": 6,
-      "K2O": 8
+      "N": 13.0,
+      "P2O5": 6.0,
+      "K2O": 8.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "base_025"
   },
   {
-    "_id": "add_001",
+    "name": "더존완효성",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 12.0,
+      "P2O5": 5.0,
+      "K2O": 6.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_026"
+  },
+  {
+    "name": "도우미골드",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 16.0,
+      "P2O5": 6.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_027"
+  },
+  {
+    "name": "땅심18복비골드(벼)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 18.0,
+      "P2O5": 7.0,
+      "K2O": 9.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_028"
+  },
+  {
+    "name": "땅심30",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 30.0,
+      "P2O5": 8.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_029"
+  },
+  {
+    "name": "땅심골드(원예)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 12.0,
+      "P2O5": 8.0,
+      "K2O": 9.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_030"
+  },
+  {
+    "name": "땅심명가",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 21.0,
+      "P2O5": 7.0,
+      "K2O": 11.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_031"
+  },
+  {
+    "name": "땅심원예풍년",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 15.0,
+      "P2O5": 7.0,
+      "K2O": 7.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_032"
+  },
+  {
+    "name": "땅심측조짱",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 28.0,
+      "P2O5": 7.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_033"
+  },
+  {
+    "name": "땅조아",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 21.0,
+      "P2O5": 9.0,
+      "K2O": 11.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_034"
+  },
+  {
+    "name": "롱런모든작물",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 12.0,
+      "P2O5": 5.0,
+      "K2O": 5.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_035"
+  },
+  {
+    "name": "롱스타K",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 19.0,
+      "P2O5": 10.0,
+      "K2O": 10.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_036"
+  },
+  {
+    "name": "롱스타파종상",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 30.0,
+      "P2O5": 6.0,
+      "K2O": 6.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_037"
+  },
+  {
+    "name": "롱스타플러스(완효성)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 21.0,
+      "P2O5": 7.0,
+      "K2O": 10.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_038"
+  },
+  {
+    "name": "만세복합측조(완효성함유)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 22.0,
+      "P2O5": 8.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_039"
+  },
+  {
+    "name": "맞춤16호",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 22.0,
+      "P2O5": 10.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_040"
+  },
+  {
+    "name": "맞춤18호",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 21.0,
+      "P2O5": 13.0,
+      "K2O": 9.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_041"
+  },
+  {
+    "name": "맞춤19호",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 20.0,
+      "P2O5": 10.0,
+      "K2O": 11.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_042"
+  },
+  {
+    "name": "맞춤20호",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 19.0,
+      "P2O5": 10.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_043"
+  },
+  {
+    "name": "맞춤23호",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 16.0,
+      "P2O5": 10.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_044"
+  },
+  {
+    "name": "맞춤24호",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 13.0,
+      "P2O5": 10.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_045"
+  },
+  {
+    "name": "맞춤25호",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 10.0,
+      "P2O5": 10.0,
+      "K2O": 7.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_046"
+  },
+  {
+    "name": "명품22",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 22.0,
+      "P2O5": 7.0,
+      "K2O": 10.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_047"
+  },
+  {
+    "name": "명품300",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 30.0,
+      "P2O5": 10.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_048"
+  },
+  {
+    "name": "명품유비롱",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 18.0,
+      "P2O5": 9.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_049"
+  },
+  {
+    "name": "미래로22(원예)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 22.0,
+      "P2O5": 6.0,
+      "K2O": 7.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_050"
+  },
+  {
+    "name": "미래로뿌리왕",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 11.0,
+      "P2O5": 8.0,
+      "K2O": 9.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_051"
+  },
+  {
+    "name": "미생물고형비료",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 15.0,
+      "P2O5": 6.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_052"
+  },
+  {
+    "name": "미생물논비료",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 28.0,
+      "P2O5": 6.0,
+      "K2O": 7.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_053"
+  },
+  {
+    "name": "미생물밭비료",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 12.0,
+      "P2O5": 5.0,
+      "K2O": 7.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_054"
+  },
+  {
+    "name": "미생물올코팅",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 28.0,
+      "P2O5": 5.0,
+      "K2O": 7.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_055"
+  },
+  {
+    "name": "미생물완효성",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 21.0,
+      "P2O5": 7.0,
+      "K2O": 9.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_056"
+  },
+  {
+    "name": "바짝원예(고추,마늘,양파,…)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 13.0,
+      "P2O5": 6.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_057"
+  },
+  {
+    "name": "반포로OK",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 28.0,
+      "P2O5": 7.0,
+      "K2O": 7.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_058"
+  },
+  {
+    "name": "밭에롱(지효성)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 15.0,
+      "P2O5": 6.0,
+      "K2O": 7.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_059"
+  },
+  {
+    "name": "배추고형비료",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 15.0,
+      "P2O5": 4.0,
+      "K2O": 10.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_060"
+  },
+  {
+    "name": "보리, 밀비료",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 21.0,
+      "P2O5": 15.0,
+      "K2O": 5.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_061"
+  },
+  {
+    "name": "보리24",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 24.0,
+      "P2O5": 16.0,
+      "K2O": 5.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_062"
+  },
+  {
+    "name": "복합비료(21-17-17)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 21.0,
+      "P2O5": 17.0,
+      "K2O": 17.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_063"
+  },
+  {
+    "name": "빠른원예추비(질산태, 유황함유)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 14.0,
+      "P2O5": 2.0,
+      "K2O": 12.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_064"
+  },
+  {
+    "name": "뿌리왕왕PN(고추,참외,호박)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 13.0,
+      "P2O5": 8.0,
+      "K2O": 9.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_065"
+  },
+  {
+    "name": "뿌리조은",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 12.0,
+      "P2O5": 7.0,
+      "K2O": 9.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_066"
+  },
+  {
+    "name": "수퍼고추/감자/마늘양파",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 12.0,
+      "P2O5": 7.0,
+      "K2O": 6.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_067"
+  },
+  {
+    "name": "슈퍼50",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 6.0,
+      "P2O5": 4.0,
+      "K2O": 4.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_068"
+  },
+  {
+    "name": "슈퍼고추",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 12.0,
+      "P2O5": 7.0,
+      "K2O": 6.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_069"
+  },
+  {
+    "name": "슈퍼듀얼요소",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 40.0,
+      "P2O5": 4.0,
+      "K2O": 4.0
+    },
+    "bag_kg": 15.0,
+    "_id": "base_070"
+  },
+  {
+    "name": "슈퍼솔 밸런스",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 19.0,
+      "P2O5": 19.0,
+      "K2O": 19.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_071"
+  },
+  {
+    "name": "슈퍼오래가",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 22.0,
+      "P2O5": 7.0,
+      "K2O": 7.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_072"
+  },
+  {
+    "name": "슈퍼원예S",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 12.0,
+      "P2O5": 6.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_073"
+  },
+  {
+    "name": "스마트21(복합)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 21.0,
+      "P2O5": 6.0,
+      "K2O": 7.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_074"
+  },
+  {
+    "name": "스피드NK",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 18.0,
+      "P2O5": 2.0,
+      "K2O": 10.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_075"
+  },
+  {
+    "name": "스피드추비",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 13.0,
+      "P2O5": 1.0,
+      "K2O": 12.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_076"
+  },
+  {
+    "name": "신세대22",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 22.0,
+      "P2O5": 7.0,
+      "K2O": 7.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_077"
+  },
+  {
+    "name": "신세대특호(감,밤,배추,감자)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 21.0,
+      "P2O5": 6.0,
+      "K2O": 7.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_078"
+  },
+  {
+    "name": "쌀플러스맛나(고추,감자)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 12.0,
+      "P2O5": 6.0,
+      "K2O": 6.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_079"
+  },
+  {
+    "name": "썰파원예(감자,마늘,생강,유)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 11.0,
+      "P2O5": 7.0,
+      "K2O": 9.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_080"
+  },
+  {
+    "name": "아미노플러스",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 15.0,
+      "P2O5": 5.0,
+      "K2O": 7.0
+    },
+    "bag_kg": 15.0,
+    "_id": "base_081"
+  },
+  {
+    "name": "야라밀라",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 12.0,
+      "P2O5": 11.0,
+      "K2O": 18.0
+    },
+    "bag_kg": 15.0,
+    "_id": "base_082"
+  },
+  {
+    "name": "엔피코21",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 21.0,
+      "P2O5": 17.0,
+      "K2O": 17.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_083"
+  },
+  {
+    "name": "오래가",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 18.0,
+      "P2O5": 8.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_084"
+  },
+  {
+    "name": "올원30(완효성함유)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 30.0,
+      "P2O5": 7.0,
+      "K2O": 7.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_085"
+  },
+  {
+    "name": "올코팅하이롱",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 30.0,
+      "P2O5": 6.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_086"
+  },
+  {
+    "name": "왕왕감자(감자,마늘)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 11.0,
+      "P2O5": 8.0,
+      "K2O": 7.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_087"
+  },
+  {
+    "name": "원샷 15",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 15.0,
+      "P2O5": 8.0,
+      "K2O": 10.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_088"
+  },
+  {
+    "name": "원샷 21",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 21.0,
+      "P2O5": 7.0,
+      "K2O": 7.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_089"
+  },
+  {
+    "name": "원샷 감자/고구마",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 11.0,
+      "P2O5": 7.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_090"
+  },
+  {
+    "name": "원샷 마늘/양파",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 13.0,
+      "P2O5": 7.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_091"
+  },
+  {
+    "name": "원샷 콩/땅콩/팥",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 8.0,
+      "P2O5": 8.0,
+      "K2O": 7.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_092"
+  },
+  {
+    "name": "원샷24",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 24.0,
+      "P2O5": 8.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_093"
+  },
+  {
+    "name": "원샷28(완효성함유)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 28.0,
+      "P2O5": 8.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_094"
+  },
+  {
+    "name": "원샷30",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 30.0,
+      "P2O5": 7.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_095"
+  },
+  {
+    "name": "원샷고추",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 13.0,
+      "P2O5": 7.0,
+      "K2O": 7.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_096"
+  },
+  {
+    "name": "원샷올인원(완효성함유)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 20.0,
+      "P2O5": 7.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_097"
+  },
+  {
+    "name": "원샷채소(대파/배추/양배추)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 12.0,
+      "P2O5": 7.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_098"
+  },
+  {
+    "name": "원샷특호",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 13.0,
+      "P2O5": 8.0,
+      "K2O": 10.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_099"
+  },
+  {
+    "name": "원예1호복합",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 11.0,
+      "P2O5": 7.0,
+      "K2O": 10.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_100"
+  },
+  {
+    "name": "원예과수풍년",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 12.0,
+      "P2O5": 7.0,
+      "K2O": 9.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_101"
+  },
+  {
+    "name": "원예전용",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 10.0,
+      "P2O5": 6.0,
+      "K2O": 7.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_102"
+  },
+  {
+    "name": "원예추비",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 13.0,
+      "P2O5": 1.0,
+      "K2O": 12.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_103"
+  },
+  {
+    "name": "유기농특호",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 45.0,
+      "P2O5": 7.0,
+      "K2O": 5.0
+    },
+    "bag_kg": 0.0,
+    "_id": "base_104"
+  },
+  {
+    "name": "유황감자비료",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 11.0,
+      "P2O5": 8.0,
+      "K2O": 10.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_105"
+  },
+  {
+    "name": "으뜸왕감자",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 10.0,
+      "P2O5": 8.0,
+      "K2O": 9.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_106"
+  },
+  {
+    "name": "이편한NK",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 30.0,
+      "P2O5": 1.0,
+      "K2O": 13.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_107"
+  },
+  {
+    "name": "이편한S",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 26.0,
+      "P2O5": 6.0,
+      "K2O": 7.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_108"
+  },
+  {
+    "name": "인산칼리맞춤1호",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 20.0,
+      "P2O5": 18.0,
+      "K2O": 15.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_109"
+  },
+  {
+    "name": "일회만290",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 22.0,
+      "P2O5": 9.0,
+      "K2O": 10.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_110"
+  },
+  {
+    "name": "잡곡(콩,땅콩,깨,팥)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 8.0,
+      "P2O5": 8.0,
+      "K2O": 9.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_111"
+  },
+  {
+    "name": "잡곡(콩/깨/땅콩)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 8.0,
+      "P2O5": 8.0,
+      "K2O": 9.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_112"
+  },
+  {
+    "name": "조비21복합(원예)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 21.0,
+      "P2O5": 7.0,
+      "K2O": 9.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_113"
+  },
+  {
+    "name": "참세대22(22-7-9)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 22.0,
+      "P2O5": 7.0,
+      "K2O": 9.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_114"
+  },
+  {
+    "name": "측조로870(고추,벼 등 완효성)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 18.0,
+      "P2O5": 7.0,
+      "K2O": 10.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_115"
+  },
+  {
+    "name": "측조로한번만(완효성)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 22.0,
+      "P2O5": 7.0,
+      "K2O": 9.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_116"
+  },
+  {
+    "name": "콩비료",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 5.0,
+      "P2O5": 20.0,
+      "K2O": 15.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_117"
+  },
+  {
+    "name": "쾌청(보리,밀,조사료)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 22.0,
+      "P2O5": 16.0,
+      "K2O": 5.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_118"
+  },
+  {
+    "name": "토토그린",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 4.0,
+      "P2O5": 2.0,
+      "K2O": 1.0
+    },
+    "bag_kg": 0.0,
+    "_id": "base_119"
+  },
+  {
+    "name": "토토유박",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 4.0,
+      "P2O5": 2.0,
+      "K2O": 1.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_120"
+  },
+  {
+    "name": "파워 플러스",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 21.0,
+      "P2O5": 5.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_121"
+  },
+  {
+    "name": "파워22복합(완효성함유)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 22.0,
+      "P2O5": 8.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_122"
+  },
+  {
+    "name": "파워감자",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 11.0,
+      "P2O5": 8.0,
+      "K2O": 9.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_123"
+  },
+  {
+    "name": "파워성장엔(질산태, 유황함유)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 8.0,
+      "P2O5": 8.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_124"
+  },
+  {
+    "name": "파워원예복합",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 12.0,
+      "P2O5": 6.0,
+      "K2O": 6.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_125"
+  },
+  {
+    "name": "파워한번에OK",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 22.0,
+      "P2O5": 6.0,
+      "K2O": 9.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_126"
+  },
+  {
+    "name": "폴리피드(19-19-19)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 19.0,
+      "P2O5": 19.0,
+      "K2O": 19.0
+    },
+    "bag_kg": 25.0,
+    "_id": "base_127"
+  },
+  {
+    "name": "하이롱",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 30.0,
+      "P2O5": 5.0,
+      "K2O": 7.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_128"
+  },
+  {
+    "name": "한번애",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 25.0,
+      "P2O5": 7.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_129"
+  },
+  {
+    "name": "한번에OK",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 18.0,
+      "P2O5": 6.0,
+      "K2O": 11.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_130"
+  },
+  {
+    "name": "한번에아리커",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 21.0,
+      "P2O5": 10.0,
+      "K2O": 11.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_131"
+  },
+  {
+    "name": "한번에풀코스",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 30.0,
+      "P2O5": 6.0,
+      "K2O": 9.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_132"
+  },
+  {
+    "name": "한아름특호(사과,배,복숭아)",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 12.0,
+      "P2O5": 10.0,
+      "K2O": 9.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_133"
+  },
+  {
+    "name": "헬리앤드론",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 10.0,
+      "P2O5": 2.0,
+      "K2O": 7.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_134"
+  },
+  {
+    "name": "휴믹황원예",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 12.0,
+      "P2O5": 6.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_135"
+  },
+  {
+    "name": "흙사랑21",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 21.0,
+      "P2O5": 6.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 20.0,
+    "_id": "base_136"
+  },
+  {
+    "name": "흙살로POP",
+    "stage": [
+      "basal"
+    ],
+    "grade": {
+      "N": 12.0,
+      "P2O5": 7.0,
+      "K2O": 8.0
+    },
+    "bag_kg": 15.0,
+    "_id": "base_137"
+  },
+  {
     "name": "18-0-16",
-    "stage": ["topdress"],
+    "stage": [
+      "topdress"
+    ],
     "grade": {
-      "N": 18,
-      "P2O5": 0,
-      "K2O": 16
+      "N": 18.0,
+      "P2O5": 0.0,
+      "K2O": 16.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "add_001"
   },
   {
-    "_id": "add_002",
     "name": "규산NK",
-    "stage": ["topdress"],
+    "stage": [
+      "topdress"
+    ],
     "grade": {
-      "N": 18,
-      "P2O5": 0,
-      "K2O": 14
+      "N": 18.0,
+      "P2O5": 0.0,
+      "K2O": 14.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "add_002"
   },
   {
-    "_id": "add_003",
     "name": "납작이",
-    "stage": ["topdress"],
+    "stage": [
+      "topdress"
+    ],
     "grade": {
-      "N": 13,
-      "P2O5": 0,
-      "K2O": 12
+      "N": 13.0,
+      "P2O5": 0.0,
+      "K2O": 12.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "add_003"
   },
   {
-    "_id": "add_004",
     "name": "더블NK",
-    "stage": ["topdress"],
+    "stage": [
+      "topdress"
+    ],
     "grade": {
-      "N": 34,
-      "P2O5": 0,
-      "K2O": 13
+      "N": 34.0,
+      "P2O5": 0.0,
+      "K2O": 13.0
     },
-    "bag_kg": 15
+    "bag_kg": 15.0,
+    "_id": "add_004"
   },
   {
-    "_id": "add_005",
     "name": "땅심NK16",
-    "stage": ["topdress"],
+    "stage": [
+      "topdress"
+    ],
     "grade": {
-      "N": 18,
-      "P2O5": 0,
-      "K2O": 16
+      "N": 18.0,
+      "P2O5": 0.0,
+      "K2O": 16.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "add_005"
   },
   {
-    "_id": "add_006",
     "name": "땅심엔케이",
-    "stage": ["topdress"],
+    "stage": [
+      "topdress"
+    ],
     "grade": {
-      "N": 18,
-      "P2O5": 0,
-      "K2O": 15
+      "N": 18.0,
+      "P2O5": 0.0,
+      "K2O": 15.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "add_006"
   },
   {
-    "_id": "add_007",
     "name": "땅심파워NK",
-    "stage": ["topdress"],
+    "stage": [
+      "topdress"
+    ],
     "grade": {
-      "N": 30,
-      "P2O5": 0,
-      "K2O": 11
+      "N": 30.0,
+      "P2O5": 0.0,
+      "K2O": 11.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "add_007"
   },
   {
-    "_id": "add_008",
     "name": "맞춤추비27호",
-    "stage": ["topdress"],
+    "stage": [
+      "topdress"
+    ],
     "grade": {
-      "N": 20,
-      "P2O5": 0,
-      "K2O": 9
+      "N": 20.0,
+      "P2O5": 0.0,
+      "K2O": 9.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "add_008"
   },
   {
-    "_id": "add_009",
     "name": "맞춤추비28호",
-    "stage": ["topdress"],
+    "stage": [
+      "topdress"
+    ],
     "grade": {
-      "N": 17,
-      "P2O5": 0,
-      "K2O": 10
+      "N": 17.0,
+      "P2O5": 0.0,
+      "K2O": 10.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "add_009"
   },
   {
-    "_id": "add_010",
     "name": "맞춤추비29호",
-    "stage": ["topdress"],
+    "stage": [
+      "topdress"
+    ],
     "grade": {
-      "N": 13,
-      "P2O5": 0,
-      "K2O": 10
+      "N": 13.0,
+      "P2O5": 0.0,
+      "K2O": 10.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "add_010"
   },
   {
-    "_id": "add_011",
     "name": "맞춤추비30호",
-    "stage": ["topdress"],
+    "stage": [
+      "topdress"
+    ],
     "grade": {
-      "N": 17,
-      "P2O5": 0,
-      "K2O": 14
+      "N": 17.0,
+      "P2O5": 0.0,
+      "K2O": 14.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "add_011"
   },
   {
-    "_id": "add_012",
     "name": "무레타",
-    "stage": ["topdress"],
+    "stage": [
+      "topdress"
+    ],
     "grade": {
-      "N": 16,
-      "P2O5": 0,
-      "K2O": 15
+      "N": 16.0,
+      "P2O5": 0.0,
+      "K2O": 15.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "add_012"
   },
   {
-    "_id": "add_013",
     "name": "바짝엔케이22(질산태)",
-    "stage": ["topdress"],
+    "stage": [
+      "topdress"
+    ],
     "grade": {
-      "N": 22,
-      "P2O5": 0,
-      "K2O": 12
+      "N": 22.0,
+      "P2O5": 0.0,
+      "K2O": 12.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "add_013"
   },
   {
-    "_id": "add_014",
     "name": "반포로NK",
-    "stage": ["topdress"],
+    "stage": [
+      "topdress"
+    ],
     "grade": {
-      "N": 29,
-      "P2O5": 0,
-      "K2O": 15
+      "N": 29.0,
+      "P2O5": 0.0,
+      "K2O": 15.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "add_014"
   },
   {
-    "_id": "add_015",
     "name": "빠른N",
-    "stage": ["topdress"],
+    "stage": [
+      "topdress"
+    ],
     "grade": {
-      "N": 13,
-      "P2O5": 0,
-      "K2O": 13
+      "N": 13.0,
+      "P2O5": 0.0,
+      "K2O": 13.0
     },
-    "bag_kg": 20
+    "bag_kg": 20.0,
+    "_id": "add_015"
+  },
+  {
+    "name": "슈퍼NK24",
+    "stage": [
+      "topdress"
+    ],
+    "grade": {
+      "N": 24.0,
+      "P2O5": 0.0,
+      "K2O": 13.0
+    },
+    "bag_kg": 20.0,
+    "_id": "add_016"
+  },
+  {
+    "name": "스피드NK",
+    "stage": [
+      "topdress"
+    ],
+    "grade": {
+      "N": 16.0,
+      "P2O5": 0.0,
+      "K2O": 15.0
+    },
+    "bag_kg": 20.0,
+    "_id": "add_017"
+  },
+  {
+    "name": "시설관주특호",
+    "stage": [
+      "topdress"
+    ],
+    "grade": {
+      "N": 17.0,
+      "P2O5": 0.0,
+      "K2O": 14.0
+    },
+    "bag_kg": 20.0,
+    "_id": "add_018"
+  },
+  {
+    "name": "신세대NK",
+    "stage": [
+      "topdress"
+    ],
+    "grade": {
+      "N": 28.0,
+      "P2O5": 0.0,
+      "K2O": 16.0
+    },
+    "bag_kg": 20.0,
+    "_id": "add_019"
+  },
+  {
+    "name": "알부자NK",
+    "stage": [
+      "topdress"
+    ],
+    "grade": {
+      "N": 15.0,
+      "P2O5": 1.0,
+      "K2O": 10.0
+    },
+    "bag_kg": 20.0,
+    "_id": "add_020"
+  },
+  {
+    "name": "엔케이804",
+    "stage": [
+      "topdress"
+    ],
+    "grade": {
+      "N": 18.0,
+      "P2O5": 0.0,
+      "K2O": 14.0
+    },
+    "bag_kg": 20.0,
+    "_id": "add_021"
+  },
+  {
+    "name": "엔케이도BS",
+    "stage": [
+      "topdress"
+    ],
+    "grade": {
+      "N": 28.0,
+      "P2O5": 0.0,
+      "K2O": 12.0
+    },
+    "bag_kg": 20.0,
+    "_id": "add_022"
+  },
+  {
+    "name": "엔케이도골드(웃거름)",
+    "stage": [
+      "topdress"
+    ],
+    "grade": {
+      "N": 22.0,
+      "P2O5": 0.0,
+      "K2O": 14.0
+    },
+    "bag_kg": 20.0,
+    "_id": "add_023"
+  },
+  {
+    "name": "엔피코 명품NK",
+    "stage": [
+      "topdress"
+    ],
+    "grade": {
+      "N": 18.0,
+      "P2O5": 0.0,
+      "K2O": 10.0
+    },
+    "bag_kg": 20.0,
+    "_id": "add_024"
+  },
+  {
+    "name": "원샷NK",
+    "stage": [
+      "topdress"
+    ],
+    "grade": {
+      "N": 25.0,
+      "P2O5": 0.0,
+      "K2O": 10.0
+    },
+    "bag_kg": 20.0,
+    "_id": "add_025"
+  },
+  {
+    "name": "원샷추비특호",
+    "stage": [
+      "topdress"
+    ],
+    "grade": {
+      "N": 13.0,
+      "P2O5": 0.0,
+      "K2O": 13.0
+    },
+    "bag_kg": 20.0,
+    "_id": "add_026"
+  },
+  {
+    "name": "원예웃거름골드(풍농)",
+    "stage": [
+      "topdress"
+    ],
+    "grade": {
+      "N": 14.0,
+      "P2O5": 0.0,
+      "K2O": 12.0
+    },
+    "bag_kg": 20.0,
+    "_id": "add_027"
+  },
+  {
+    "name": "원예웃거름특호",
+    "stage": [
+      "topdress"
+    ],
+    "grade": {
+      "N": 13.0,
+      "P2O5": 0.0,
+      "K2O": 13.0
+    },
+    "bag_kg": 20.0,
+    "_id": "add_028"
+  },
+  {
+    "name": "원예추비",
+    "stage": [
+      "topdress"
+    ],
+    "grade": {
+      "N": 13.0,
+      "P2O5": 0.0,
+      "K2O": 13.0
+    },
+    "bag_kg": 20.0,
+    "_id": "add_029"
+  },
+  {
+    "name": "원예추비특호",
+    "stage": [
+      "topdress"
+    ],
+    "grade": {
+      "N": 16.0,
+      "P2O5": 0.0,
+      "K2O": 11.0
+    },
+    "bag_kg": 20.0,
+    "_id": "add_030"
+  },
+  {
+    "name": "으뜸NK802",
+    "stage": [
+      "topdress"
+    ],
+    "grade": {
+      "N": 18.0,
+      "P2O5": 0.0,
+      "K2O": 12.0
+    },
+    "bag_kg": 20.0,
+    "_id": "add_031"
+  },
+  {
+    "name": "으뜸드론 NK",
+    "stage": [
+      "topdress"
+    ],
+    "grade": {
+      "N": 25.0,
+      "P2O5": 0.0,
+      "K2O": 15.0
+    },
+    "bag_kg": 20.0,
+    "_id": "add_032"
+  },
+  {
+    "name": "칼슘요소",
+    "stage": [
+      "topdress"
+    ],
+    "grade": {
+      "N": 30.0,
+      "P2O5": 0.0,
+      "K2O": 1.0
+    },
+    "bag_kg": 20.0,
+    "_id": "add_033"
+  },
+  {
+    "name": "파워성장엔추비",
+    "stage": [
+      "topdress"
+    ],
+    "grade": {
+      "N": 13.0,
+      "P2O5": 2.0,
+      "K2O": 12.0
+    },
+    "bag_kg": 20.0,
+    "_id": "add_034"
+  },
+  {
+    "name": "한포로NK(원예웃거름)",
+    "stage": [
+      "topdress"
+    ],
+    "grade": {
+      "N": 30.0,
+      "P2O5": 0.0,
+      "K2O": 12.0
+    },
+    "bag_kg": 20.0,
+    "_id": "add_035"
   }
 ]

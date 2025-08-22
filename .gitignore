@@ -120,3 +120,5 @@ dmypy.json
 
 fertilizer_db_import.py
 *.pdf
+
+/scripts/

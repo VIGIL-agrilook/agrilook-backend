@@ -3,18 +3,16 @@ import requests
 import xmltodict
 from dotenv import load_dotenv
 import sys
-import re
-import traceback
-import logging
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config.user_data import USER_DATA
 from config.crop_codes import get_crop_code
 import pymongo
 import math
+import logging
 
+logging.basicConfig(level=logging.INFO)
 
 load_dotenv()
-logger = logging.getLogger(__name__)
 
 class SoilFertilizerService:
     def __init__(self):
@@ -22,34 +20,6 @@ class SoilFertilizerService:
         if not self.api_key:
             raise RuntimeError("FERTILIZER_API_KEY not set in environment")
         self.api_url = "http://apis.data.go.kr/1390802/SoilEnviron/FrtlzrUseExp/getSoilFrtlzrExprnInfo"
-        self.debug = os.getenv('FERTILIZER_API_DEBUG', '0') == '1'
-
-    # ====== 내부 유틸 ======
-    def _parse_number_or_range(self, value, default=None):
-        if value is None:
-            return default
-        if isinstance(value, (int, float)):
-            return float(value)
-        if isinstance(value, str):
-            nums = re.findall(r"[-+]?\d*\.?\d+", value.replace(",", ""))
-            if not nums:
-                return default
-            try:
-                floats = [float(n) for n in nums]
-            except Exception:
-                return default
-            if len(floats) == 1:
-                return floats[0]
-            return sum(floats[:2]) / 2.0
-        return default
-
-    def _soil_value(self, soil: dict, candidate_keys, default=None):
-        for k in candidate_keys:
-            if k in soil and soil.get(k) not in (None, ""):
-                return self._parse_number_or_range(soil.get(k), default)
-        return default
-
-    # (구) 라우트 호환 유틸은 제거되었습니다.
 
     # ====== 공개 메인 ======
     def get_recommendation_bundle(self):
@@ -102,81 +72,33 @@ class SoilFertilizerService:
     def fetch_fertilizer_api(self, farm_info):
         """흙토람 체험 API 호출 → dict (단위: kg/10a)"""
         soil = farm_info['soil']
-        # 현실적인 안전 기본값(센서 부재 시 재시도용)
-        typical = {
-            'acid': 6.5,     # pH
-            'om': 22.0,      # g/kg
-            'vldpha': 120.0, # mg/kg (유효인산)
-            'posifert_K': 0.55, # cmol+/kg (치환성칼리)
-            'posifert_Ca': 6.8, # cmol+/kg
-            'posifert_Mg': 2.1, # cmol+/kg
-            'selc': 1.2,        # dS/m (EC)
-        }
-
+        ph = float(soil.get('pH', 6.5) or 6.5)
+        om = float(soil.get('OM', 22) or 22)
+        vldpha = float(soil.get('P', 10) or 10)
+        posifert_K = float(soil.get('K', 4) or 4)
+        posifert_Ca = float(soil.get('Ca', 6) or 6)
+        posifert_Mg = float(soil.get('Mg', 13) or 13)
+        selc = float(soil.get('EC', 6) or 6)
+        # crop_code를 str로 변환 (API에는 문자열 코드로 전달)
+        crop_code_raw = farm_info.get('crop_code')
+        crop_code = str(crop_code_raw)
         params = {
             'serviceKey': self.api_key,
-            'crop_Code': farm_info.get('crop_code'),
-            'acid': self._soil_value(soil, ['ph', 'pH'], typical['acid']),
-            'om': self._soil_value(soil, ['om', 'OM'], typical['om']),
-            'vldpha': self._soil_value(soil, ['vldpha', 'P'], typical['vldpha']),
-            'posifert_K': self._soil_value(soil, ['posifert_K', 'K'], typical['posifert_K']),
-            'posifert_Ca': self._soil_value(soil, ['posifert_Ca', 'Ca'], typical['posifert_Ca']),
-            'posifert_Mg': self._soil_value(soil, ['posifert_Mg', 'Mg'], typical['posifert_Mg']),
-            'selc': self._soil_value(soil, ['selc', 'EC'], typical['selc']),
+            'crop_Code': crop_code,
+            'acid': ph,
+            'om': om,
+            'vldpha': vldpha,
+            'posifert_K': posifert_K,
+            'posifert_Ca': posifert_Ca,
+            'posifert_Mg': posifert_Mg,
+            'selc': max(3, selc),
         }
-        try:
-            if self.debug:
-                safe_params = dict(params)
-                if 'serviceKey' in safe_params:
-                    safe_params['serviceKey'] = '***'
-                logger.debug("[FERT_API] params: %s", safe_params)
-            r = requests.get(self.api_url, params=params, timeout=10)
-            if self.debug:
-                logger.debug("[FERT_API] status: %s, bytes: %s", r.status_code, len(r.text))
-            r.raise_for_status()
-            parsed = self.parse_fertilizer_response(r.text)
-            ok = bool(parsed and parsed.get('success'))
-            if self.debug:
-                logger.debug("[FERT_API] parsed success: %s", ok)
-                if not ok:
-                    # 응답 전문을 일부 노출해 원인 파악
-                    snippet = r.text[:500]
-                    logger.debug("[FERT_API] response snippet: %s", snippet)
-            if ok:
-                return parsed
-
-            # 재시도: 전부 전형값으로 강제
-            retry_params = {
-                'serviceKey': self.api_key,
-                'crop_Code': farm_info.get('crop_code'),
-                'acid': typical['acid'],
-                'om': typical['om'],
-                'vldpha': typical['vldpha'],
-                'posifert_K': typical['posifert_K'],
-                'posifert_Ca': typical['posifert_Ca'],
-                'posifert_Mg': typical['posifert_Mg'],
-                'selc': typical['selc'],
-            }
-            if self.debug:
-                safe_retry_params = dict(retry_params)
-                if 'serviceKey' in safe_retry_params:
-                    safe_retry_params['serviceKey'] = '***'
-                logger.debug("[FERT_API] RETRY with typical params: %s", safe_retry_params)
-            r2 = requests.get(self.api_url, params=retry_params, timeout=10)
-            if self.debug:
-                logger.debug("[FERT_API] retry status: %s, bytes: %s", r2.status_code, len(r2.text))
-            r2.raise_for_status()
-            parsed2 = self.parse_fertilizer_response(r2.text)
-            ok2 = bool(parsed2 and parsed2.get('success'))
-            if self.debug:
-                logger.debug("[FERT_API] retry parsed success: %s", ok2)
-                if not ok2:
-                    logger.debug("[FERT_API] retry response snippet: %s", r2.text[:500])
-            return parsed2 if ok2 else {}
-        except Exception as e:
-            if self.debug:
-                logger.exception("[FERT_API] ERROR during fetch")
-            return {}
+        r = requests.get(self.api_url, params=params, timeout=10)
+        # logging.debug 수준의 디버그 로그 제거
+        r.raise_for_status()
+        parsed = self.parse_fertilizer_response(r.text)
+        # logging.debug 수준의 디버그 로그 제거
+        return parsed if parsed and parsed.get('success') else {}
 
     def parse_fertilizer_response(self, xml_content):
         """XML → dict (키 대소문자 혼용 대비)"""
@@ -222,9 +144,7 @@ class SoilFertilizerService:
                 'pre_Compost_Mix':   g(item, 'pre_Compost_Mix'),
             }
             return result
-        except Exception as e:
-            if getattr(self, 'debug', False):
-                logger.exception("[FERT_API] parse error")
+        except Exception:
             return None
 
     # ====== 면적/요구량 계산 ======
@@ -263,16 +183,23 @@ class SoilFertilizerService:
         """N, P2O5, K2O 필요량(kg) → 전체 면적 스케일링"""
         s = farm_info['farm_size_10a']
         f = lambda k: float(api_data.get(k, '0')) * s
+        base_N = f('pre_Fert_N')
+        base_P = f('pre_Fert_P')
+        base_K = f('pre_Fert_K')
+        add_N = f('post_Fert_N')
+        add_P = f('post_Fert_P')
+        add_K = f('post_Fert_K')
+        # logging.debug 수준의 디버그 로그 제거
         return {
             'base': {
-                'N': f('pre_Fert_N'),
-                'P': f('pre_Fert_P'),
-                'K': f('pre_Fert_K'),
+                'N': base_N,
+                'P': base_P,
+                'K': base_K,
             },
             'additional': {
-                'N': f('post_Fert_N'),
-                'P': f('post_Fert_P'),
-                'K': f('post_Fert_K'),
+                'N': add_N,
+                'P': add_P,
+                'K': add_K,
             }
         }
 
@@ -289,11 +216,7 @@ class SoilFertilizerService:
             query = {"stage": {"$in": stage_keys}, "grade.N": {"$exists": True}}
             docs = list(col.find(query))
 
-            total_target = target_n + target_p + target_k
-            if total_target <= 0:
-                return []
-            tn, tp, tk = target_n/total_target, target_p/total_target, target_k/total_target
-
+            # 디버그 프린트 제거
             results = []
             for fert in docs:
                 g = fert.get("grade", {}) or {}
@@ -302,15 +225,16 @@ class SoilFertilizerService:
                     p = float(g.get('P2O5', 0) or 0)
                     k = float(g.get('K2O', 0) or 0)
                     bag = float(fert.get('bag_kg', 20) or 20)
-                except Exception:
+                except Exception as e:
+                    # 디버그 로그 제거
                     continue
                 if (n+p+k) <= 0:
+                    # 디버그 로그 제거
                     continue
 
                 # 성분 비율 정규화 및 거리 계산 (내부 계산용)
                 ft = n+p+k
                 fn, fp, fk = n/ft, p/ft, k/ft
-                dist = math.sqrt((tn-fn)**2 + (tp-fp)**2 + (tk-fk)**2)
 
                 # 실제 사용량/포대수/부족량 계산
                 usage_kg = target_n / (n/100.0) if n > 0 else 0.0
@@ -319,10 +243,10 @@ class SoilFertilizerService:
                 supplied_k = usage_kg * (k/100.0)
                 short_p = max(0.0, target_p - supplied_p)
                 short_k = max(0.0, target_k - supplied_k)
-
-                # 부족분이 0보다 작은 경우(과잉) 추천에서 제외
                 if short_p < 0 or short_k < 0:
+                    # 디버그 로그 제거
                     continue
+                # 디버그 로그 제거
                 results.append({
                     "_id": fert.get("_id",""),
                     "name": fert.get("name",""),
@@ -335,18 +259,8 @@ class SoilFertilizerService:
                     "total_shortage": round(short_p + short_k, 2)
                 })
 
-            # 거리 기준 정렬
-            def npk_distance(x):
-                g = x['grade']
-                n = float(g.get('N', 0) or 0)
-                p = float(g.get('P2O5', 0) or 0)
-                k = float(g.get('K2O', 0) or 0)
-                total = n + p + k
-                if total <= 0:
-                    return float('inf')
-                fn, fp, fk = n/total, p/total, k/total
-                return math.sqrt((tn-fn)**2 + (tp-fp)**2 + (tk-fk)**2)
-            results.sort(key=npk_distance)
+            # 거리 기준 정렬 제거, 단순 부족분/사용량/포대수 기준 정렬
+            results.sort(key=lambda x: (x["shortage_P_kg"], x["shortage_K_kg"], x["bags"], x["usage_kg"]))
             return results[:top_n]
         finally:
             client.close()

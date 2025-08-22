@@ -44,36 +44,36 @@ def get_fertilizer_recommendation():
     base_list = []
     for fert in base_fertilizers:
         base_list.append({
-            "K_ratio": fert.get("K_ratio", 0),
-            "N_ratio": fert.get("N_ratio", 0),
-            "P_ratio": fert.get("P_ratio", 0),
-            "bags": fert.get("bags", 0),
+            "K_ratio": round(float(fert.get("K_ratio", 0) or 0), 2),
+            "N_ratio": round(float(fert.get("N_ratio", 0) or 0), 2),
+            "P_ratio": round(float(fert.get("P_ratio", 0) or 0), 2),
+            "bags": round(float(fert.get("bags", 0) or 0), 2),
             "fertilizer_id": fert.get("fertilizer_id", fert.get("_id", "")),
             "fertilizer_name": fert.get("fertilizer_name", fert.get("name", "")),
-            "need_K_kg": fert.get("need_K_kg", 0),
-            "need_N_kg": fert.get("need_N_kg", 0),
-            "need_P_kg": fert.get("need_P_kg", 0),
-            "shortage_K_kg": fert.get("shortage_K_kg", 0),
-            "shortage_P_kg": fert.get("shortage_P_kg", 0),
-            "usage_kg": fert.get("usage_kg", fert.get("amount", fert.get("bag_kg", 0)))
+            "need_K_kg": round(float(fert.get("need_K_kg", 0) or 0), 2),
+            "need_N_kg": round(float(fert.get("need_N_kg", 0) or 0), 2),
+            "need_P_kg": round(float(fert.get("need_P_kg", 0) or 0), 2),
+            "shortage_K_kg": round(float(fert.get("shortage_K_kg", 0) or 0), 2),
+            "shortage_P_kg": round(float(fert.get("shortage_P_kg", 0) or 0), 2),
+            "usage_kg": round(float(fert.get("usage_kg", fert.get("amount", fert.get("bag_kg", 0)) ) or 0), 2)
         })
 
     # 웃거름 비료 목록
     additional_list = []
     for fert in topdress_fertilizers:
         additional_list.append({
-            "K_ratio": fert.get("K_ratio", 0),
-            "N_ratio": fert.get("N_ratio", 0),
-            "P_ratio": fert.get("P_ratio", 0),
-            "bags": fert.get("bags", 0),
+            "K_ratio": round(float(fert.get("K_ratio", 0) or 0), 2),
+            "N_ratio": round(float(fert.get("N_ratio", 0) or 0), 2),
+            "P_ratio": round(float(fert.get("P_ratio", 0) or 0), 2),
+            "bags": round(float(fert.get("bags", 0) or 0), 2),
             "fertilizer_id": fert.get("fertilizer_id", fert.get("_id", "")),
             "fertilizer_name": fert.get("fertilizer_name", fert.get("name", "")),
-            "need_K_kg": fert.get("need_K_kg", 0),
-            "need_N_kg": fert.get("need_N_kg", 0),
-            "need_P_kg": fert.get("need_P_kg", 0),
-            "shortage_K_kg": fert.get("shortage_K_kg", 0),
-            "shortage_P_kg": fert.get("shortage_P_kg", 0),
-            "usage_kg": fert.get("usage_kg", fert.get("amount", fert.get("bag_kg", 0)))
+            "need_K_kg": round(float(fert.get("need_K_kg", 0) or 0), 2),
+            "need_N_kg": round(float(fert.get("need_N_kg", 0) or 0), 2),
+            "need_P_kg": round(float(fert.get("need_P_kg", 0) or 0), 2),
+            "shortage_K_kg": round(float(fert.get("shortage_K_kg", 0) or 0), 2),
+            "shortage_P_kg": round(float(fert.get("shortage_P_kg", 0) or 0), 2),
+            "usage_kg": round(float(fert.get("usage_kg", fert.get("amount", fert.get("bag_kg", 0)) ) or 0), 2)
         })
 
     result_json = {
@@ -83,10 +83,10 @@ def get_fertilizer_recommendation():
             "name": prescription.get("crop_Nm", crop_name)
         },
         "compost": {
-            "cattle_kg": compost["cattle_kg"],
-            "chicken_kg": compost["chicken_kg"],
-            "mixed_kg": compost["mixed_kg"],
-            "pig_kg": compost["pig_kg"]
+            "cattle_kg": round(float(compost["cattle_kg"] or 0), 2),
+            "chicken_kg": round(float(compost["chicken_kg"] or 0), 2),
+            "mixed_kg": round(float(compost["mixed_kg"] or 0), 2),
+            "pig_kg": round(float(compost["pig_kg"] or 0), 2)
         },
         "fertilizer": {
             "base": base_list,
