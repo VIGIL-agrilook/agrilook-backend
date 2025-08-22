@@ -11,7 +11,7 @@ from config.user_data import USER_DATA
 from services.routing_service import create_routing_chain, answer_without_retrieval
 from services.qa_service import load_qa_chain, format_source_documents
 from services.db_init import initialize_user_data_from_db
-from services.soil_fertilizer_cache import initialize_fertilizer_cache
+from services.soil_fertilizer_cache import initialize_fertilizer_cache, initialize_fertilizer_cache_if_stale
 
 chat_bp = Blueprint('chat', __name__)
 
@@ -74,10 +74,11 @@ def chat():
                     user_email=os.getenv("USER_EMAIL"),
                 )
                 # USER_DATA 갱신 후 비료 캐시도 최신 작물 기준으로 재구축
+                # 캐시 재구축은 TTL 기반으로 스로틀링
                 try:
-                    initialize_fertilizer_cache()
+                    initialize_fertilizer_cache_if_stale(ttl_seconds=3600)
                 except Exception as ce:
-                    logging.warning("[chat] Failed to rebuild fertilizer cache: %s", ce)
+                    logging.warning("[chat] Failed to refresh fertilizer cache: %s", ce)
                 logging.info("[chat] USER_DATA refreshed from DB for request")
         except Exception as e:
             logging.warning("[chat] Failed to refresh USER_DATA from DB: %s", e)

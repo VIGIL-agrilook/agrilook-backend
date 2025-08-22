@@ -69,7 +69,9 @@ class SoilFertilizerService:
         }
 
     # ====== API 호출/파싱 ======
-    def fetch_fertilizer_api(self, farm_info):
+    _api_cache = {}
+
+    def fetch_fertilizer_api(self, farm_info, ttl_seconds: int = 86400):
         """흙토람 체험 API 호출 → dict (단위: kg/10a)"""
         soil = farm_info['soil']
         ph = float(soil.get('pH', 6.5) or 6.5)
@@ -93,12 +95,19 @@ class SoilFertilizerService:
             'posifert_Mg': posifert_Mg,
             'selc': max(3, selc),
         }
+        # 캐시 키: crop_code + 주요 토양 지표 + API URL
+        key = (params['crop_Code'], ph, om, vldpha, posifert_K, posifert_Ca, posifert_Mg, params['selc'])
+        import time
+        cached = self._api_cache.get(key)
+        now = time.time()
+        if cached and (now - cached[0] < ttl_seconds):
+            return cached[1]
         r = requests.get(self.api_url, params=params, timeout=10)
-        # logging.debug 수준의 디버그 로그 제거
         r.raise_for_status()
         parsed = self.parse_fertilizer_response(r.text)
-        # logging.debug 수준의 디버그 로그 제거
-        return parsed if parsed and parsed.get('success') else {}
+        result = parsed if parsed and parsed.get('success') else {}
+        self._api_cache[key] = (now, result)
+        return result
 
     def parse_fertilizer_response(self, xml_content):
         """XML → dict (키 대소문자 혼용 대비)"""

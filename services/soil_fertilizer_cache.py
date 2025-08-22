@@ -2,11 +2,13 @@ import sys, os, copy, traceback, logging
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config.user_data import USER_DATA
+import time
 from services.soil_fertilizer_service import SoilFertilizerService
 
 logger = logging.getLogger(__name__)
 
 fertilizer_cache = {}
+_last_built_at = 0.0
 
 def initialize_fertilizer_cache():
     """
@@ -53,3 +55,18 @@ def initialize_fertilizer_cache():
             # 폴백 경로를 탔을 때만 복구 (build_front_payload 경로는 USER_DATA 미변경)
             if not hasattr(service, "build_front_payload"):
                 USER_DATA["farm"] = copy.deepcopy(farm_backup)
+
+
+def initialize_fertilizer_cache_if_stale(ttl_seconds: int = 3600) -> bool:
+    """캐시가 오래되었을 때만 재구축. 재빌드 시 True 반환."""
+    global _last_built_at
+    now = time.time()
+    if now - _last_built_at < ttl_seconds:
+        return False
+    try:
+        initialize_fertilizer_cache()
+        _last_built_at = now
+        return True
+    except Exception:
+        logger.exception("initialize_fertilizer_cache failed")
+        return False
