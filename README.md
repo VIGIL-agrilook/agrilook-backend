@@ -123,6 +123,36 @@ GET /api/intruder/recent
 }
 ```
 
+## 📁 프로젝트 구조
+
+```
+api/
+├── app.py                      # Flask 애플리케이션 메인
+├── routes/                     # API 엔드포인트
+│   ├── chat.py                # 챗봇 API
+│   ├── fertilizer.py          # 비료 추천 API
+│   ├── weather.py             # 날씨 정보 API
+│   ├── soil.py                # 토양 정보 API
+│   └── intruder.py            # 침입 감지 API
+├── services/                   # 비즈니스 로직
+│   ├── qa_service.py          # RAG 질의응답 체인
+│   ├── chat_service.py        # 챗봇 라우팅 로직
+│   ├── routing_service.py     # 질문 분류 서비스
+│   ├── soil_fertilizer_service.py  # 토양-비료 매칭
+│   └── weather_service.py     # 기상청 API 연동
+├── config/                     # 설정 및 상수
+│   ├── user_data.py           # 사용자 농장 정보
+│   └── crop_codes.py          # 작물 코드 매핑
+├── data/                       # JSON 데이터
+│   ├── fertilizers.json       # 비료 데이터베이스
+│   ├── 밑거름.json             # 밑거름 정보
+│   └── 웃거름.json             # 웃거름 정보
+├── docs/                       # 농업 기술 문서 (PDF)
+├── vectorstore/               # FAISS 벡터 저장소
+├── scripts/                   # 유틸리티 스크립트
+└── utils/                     # 공통 유틸리티
+```
+
 ## 🚀 빠른 시작
 
 ### 1️⃣ 환경 설정
