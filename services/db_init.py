@@ -10,7 +10,13 @@ def _get_mongo_client() -> pymongo.MongoClient:
     mongo_uri = os.getenv("MONGO_URI")
     if not mongo_uri:
         raise RuntimeError("MONGO_URI not set in environment")
-    return pymongo.MongoClient(mongo_uri)
+    
+    # URI에 이미 연결 옵션이 포함되어 있으므로 최소한의 설정만 추가
+    return pymongo.MongoClient(
+        mongo_uri,
+        serverSelectionTimeoutMS=30000,  # 서버 선택 타임아웃만 증가
+        retryWrites=False                # Cosmos DB 필수 설정
+    )
 
 
 def _find_user(db, user_id: Optional[str], user_email: Optional[str]):

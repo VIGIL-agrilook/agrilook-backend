@@ -1,248 +1,376 @@
 ## 들여다밭(Agrilook) 백엔드 API
 
-팀: vigil
+**팀: vigil**
 
-### 서비스 요약
+## 📋 서비스 개요
 
-- 비료 추천: POST `/api/fertilizer-recommendation` (밑거름/웃거름 각각 최대 3개)
-  - 입력: `cropname`, `farmid` (본문 JSON)
-  - 출력: 작물 정보(`crop`), 퇴비 추천(`compost`), 비료 추천(`fertilizer.base`, `fertilizer.additional`)
+농업 전문 지식 검색과 개인 맞춤형 농장 관리를 제공하는 AI 어시스턴트 시스템입니다.
 
-- 날씨 정보: GET `/api/weather/current?station=관측소번호`
-  - 출력: `temperature`, `humidity`, `precipitation`, `weather`
+### 🎯 주요 기능
 
-- 챗봇(RAG): POST `/api/chat`
-  - 입력: `message`
-  - 출력: `answer`, `routing`, `sources`
+#### 1. 🤖 AI 챗봇 (핵심 기능)
+- **POST** `/api/chat`
+- **지능형 라우팅**: 질문 유형을 자동 분류 (SEARCH/DIRECT)
+- **SEARCH**: 농업 전문 문서 검색 기반 답변 (폭염 대응, 병충해 방제 등)
+- **DIRECT**: 개인 농장 데이터 기반 답변 (비료 추천, 토양 정보 등)
 
-- 토양 검사: GET `/api/soil/sensor`, `/api/soil/satellite`
-  - 출력: 최신 토양 검사 결과
-
-- 침입자 감지: GET `/api/intruder/recent`
-  - 24시간 내 침입자 감지 데이터 + Azure Blob Storage 이미지
-  - 출력: 감지 로그, 이미지 URL, 클래스별 카운트
-  - 챗봇: 침입자 정보는 캐시를 통해 자동으로 프롬프트에 포함
-
-농촌진흥청 비료·퇴비 처방 API와 기상 데이터를 활용해 작물별 비료·퇴비 추천을 제공하는 Flask 기반 백엔드입니다. 프론트엔드와의 계약은 JSON 스키마로 고정되어 있으며, 운영 환경에서는 표준 로깅을 사용합니다.
-
-## 주요 기능
-
-- 비료/퇴비 처방: 작물 코드와 토양·면적 정보를 바탕으로 밑거름/웃거름 추천
-- 기상 조회: 관측소 기준 현재 기상 요약 제공
-- 챗봇 RAG: 벡터 저장소 + BM25 앙상블 검색 기반 질의응답
-- 토양 검사: 센서/위성 기반 최신 토양 데이터 조회
-- 침입자 감지: MongoDB 로그 + Azure Blob Storage 이미지 연동
-
-## 설치
-
-1) 파이썬 환경 준비 (Python 3.10+ 권장)
-
-2) 의존성 설치
-```
-pip install -r requirements.txt
-```
-
-3) 환경변수 설정
-```
-cp example.env .env
-# .env 파일을 열어 키/설정을 채웁니다
-```
-
-4) 실행
-```
-python app.py
-```
-기본 포트는 5001입니다. `PORT` 또는 `FLASK_DEBUG` 등은 `.env`로 제어합니다.
-
-## 환경변수(.env)
-
-- FERTILIZER_API_KEY: 공공데이터포털 비료·퇴비 API 키 (필수)
-- KMA_API_KEY: 기상청 API 키 (필수)
-- OPENAI_API_KEY: 임베딩 생성용 OpenAI 키 (선택)
-- MONGO_URI, DB_NAME: DB 사용 시 연결 정보
-- AZURE_BLOB_BASE_URL: 침입자 이미지 Azure Blob Storage URL
-- LOG_LEVEL: 기본 INFO (DEBUG 권장하지 않음, 민감정보 로그 금지)
-- FLASK_DEBUG: "1"이면 디버그 모드
-- PORT: 미설정 시 5001
-
-## API
-
-### 1) 비료·퇴비 추천
-POST `/api/fertilizer-recommendation`
-
-요청 예시
+#### 2. 🧪 비료 추천 시스템
+**POST** `/api/fertilizer-recommendation`
 ```json
+// 요청
 {
-  "cropname": "맥주보리",
-  "farmid": "farm001"
+  "cropname": "고추",
+  "farmid": "farm001"  // 선택사항
 }
-```
 
-응답 예시
-```json
+// 응답
 {
-  "_id": "farm001",
-  "crop": { "code": "01001", "name": "맥주보리" },
+  "status": "success",
+  "crop": {
+    "name": "고추",
+    "code": "01001"
+  },
   "compost": {
-    "cattle_kg": 12.3,
-    "chicken_kg": 0,
-    "mixed_kg": 5.7,
-    "pig_kg": 0
+    "cattle_kg": 1500,
+    "chicken_kg": 500,
+    "pig_kg": 300,
+    "mixed_kg": 200
   },
   "fertilizer": {
     "base": [
       {
-        "fertilizer_id": "abc123",
-        "fertilizer_name": "복합비료 21-17-17",
-        "N_ratio": 21,
-        "P_ratio": 17,
-        "K_ratio": 17,
-        "usage_kg": 32.5,
-        "bags": 1.63,
-        "need_N_kg": 6.8,
-        "need_P_kg": 3.1,
-        "need_K_kg": 2.5,
-        "shortage_P_kg": 0.4,
-        "shortage_K_kg": 0.2
+        "fertilizer_name": "복합비료 14-14-14",
+        "N_ratio": 14, "P_ratio": 14, "K_ratio": 14,
+        "usage_kg": 25.5, "bags": 1.28,
+        "shortage_P_kg": 2.1, "shortage_K_kg": 1.8
       }
     ],
-    "additional": []
+    "additional": [
+      {
+        "fertilizer_name": "요소",
+        "N_ratio": 46, "P_ratio": 0, "K_ratio": 0,
+        "usage_kg": 15.2, "bags": 0.76,
+        "shortage_P_kg": 0, "shortage_K_kg": 8.5
+      }
+    ]
   }
 }
 ```
 
-필드 규칙
-- compost.* 단위는 kg
-- N_ratio/P_ratio/K_ratio는 성분 표기(%)
-- usage_kg는 전체 면적에 해당하는 kg, bags는 포대 수
-- 각 단계(밑거름, 웃거름) 추천 개수는 최대 3개
-
-주의
-- 요청 본문이 비어 있으면 `USER_DATA`의 기본 농장/토양 정보를 사용합니다.
-
-### 2) 현재 기상
-GET `/api/weather/current?station=관측소번호`
-
-응답 예시
+#### 3. 🌤️ 기상 정보
+**GET** `/api/weather/current?station=108`
 ```json
-{
-  "temperature": 26.4,
-  "humidity": 90.0,
-  "precipitation": 0.0,
-  "weather": "맑음"
-}
-```
-
-### 3) 챗봇(RAG)
-POST `/api/chat`
-
-요청 예시
-```json
-{ "message": "배추 웃거름 시기와 양은?" }
-```
-
-응답 예시
-```json
+// 응답
 {
   "status": "success",
-  "answer": "...",
-  "routing": "SEARCH",
-  "sources": ["문서A (p.3)", "문서B (p.7)"]
+  "station": 108,
+  "temperature": 25.3,
+  "humidity": 65,
+  "precipitation": 0,
+  "weather": "맑음",
+  "timestamp": "2025-08-25T14:30:00Z"
 }
 ```
 
-### 4) 토양 검사
-GET `/api/soil/sensor?farmid=farm001`
-GET `/api/soil/satellite?farmid=farm001`
+#### 4. 🛡️ 농장 관리
 
-응답 예시
+**토양 검사**
+```bash
+GET /api/soil/sensor    # 센서 기반 데이터
+GET /api/soil/satellite # 위성 기반 데이터
+```
 ```json
+// 응답
 {
-  "_id": "test002",
-  "farmid": "farm0001",
-  "tested_at": "2025-08-22T12:00:00.000Z",
-  "src": "sensor",
+  "status": "success", 
+  "source": "sensor",
+  "tested_at": "2025-07-01T09:00:00Z",
   "result": {
-    "pH": "6.4",
-    "OM": "22.5",
-    "EC": "1.2",
-    "P": "120",
-    "K": "0.55",
-    "Ca": "6.8",
-    "Mg": "2.1"
+    "pH": 6.5,
+    "OM": 22.0,    // 유기물 g/kg
+    "EC": 6.0,     // 전기전도도 dS/m
+    "P": 10.0,     // 유효인산 mg/kg
+    "K": 4.0,      // 치환성칼리 cmol+/kg
+    "Ca": 6.0,     // 치환성칼슘 cmol+/kg
+    "Mg": 13.0     // 치환성마그네슘 cmol+/kg
   }
 }
 ```
 
-### 5) 침입자 감지
-GET `/api/intruder/recent?hours=24&farmid=farm001` (프론트엔드용 - 이미지 포함)
-
-응답 예시
+**침입자 감지**
+```bash
+GET /api/intruder/recent
+```
 ```json
+// 응답
 {
-  "farm_id": "farm001",
-  "hours_filter": 24,
-  "total_count": 2,
-  "class_counts": {
-    "human": 1,
-    "wild_rabbit": 1
+  "status": "success",
+  "summary": {
+    "total_detections": 5,
+    "classes": {
+      "멧돼지": 3,
+      "고라니": 2
+    }
   },
-  "data": [
+  "recent_detections": [
     {
-      "id": "0081",
-      "class": "human",
-      "confidence": "60%",
-      "datetime": "20250822-173720",
-      "datetime_iso": "2025-08-22T17:37:20",
-      "farm_id": "farm001",
-      "image_url": "https://yourstorage.blob.core.windows.net/images/full_20250822-173720_human.jpg"
+      "class": "멧돼지",
+      "confidence": "95%", 
+      "datetime": "20250825-143022",
+      "image_url": "https://storage.blob.core.windows.net/images/detection_001.jpg"
     }
   ]
 }
 ```
 
-**챗봇 침입자 정보**: 별도 API 없이 `intruder_cache` 서비스가 자동으로 최근 24시간 침입자 데이터를 캐시하여 챗봇 프롬프트에 포함시킵니다.
+## 🚀 빠른 시작
 
-## 프로젝트 구조(요약)
+### 1️⃣ 환경 설정
+```bash
+# 의존성 설치
+pip install -r requirements.txt
 
-```
-api/
-├── app.py
-├── config/
-│   ├── crop_codes.py
-│   ├── user_data.py
-│   └── __init__.py
-├── routes/
-│   ├── fertilizer.py
-│   ├── health.py
-│   ├── weather.py
-│   ├── chat.py
-│   ├── soil.py
-│   └── intruder.py
-├── services/
-│   ├── chat_service.py
-│   ├── db_init.py
-│   ├── qa_service.py
-│   ├── routing_service.py
-│   ├── soil_fertilizer_cache.py
-│   ├── soil_fertilizer_service.py
-│   └── weather_service.py
-├── utils/
-│   ├── fertilizer_recommender.py
-│   ├── weather_utils.py
-│   └── __init__.py
-├── vectorstore/
-│   ├── index.faiss
-│   └── index.pkl
-└── requirements.txt
+# 환경변수 설정
+cp example.env .env
+# .env 파일에서 필요한 API 키들을 설정하세요
 ```
 
-## 운영 메모
+### 2️⃣ 서버 실행
+```bash
+python app.py
+# 서버가 http://localhost:5001 에서 실행됩니다
+```
 
-- 로깅: 기본 INFO, 디버깅이 필요할 때만 LOG_LEVEL=DEBUG. API 키 등 민감정보는 로그에 출력하지 않습니다.
-- 외부 API 장애 시: `soil_fertilizer_service.py`는 안전한 기본값으로 재시도 후, 실패 시 빈 결과를 반환합니다.
-- RAG: `vectorstore/`가 필요하며 누락 시 단순 검색으로 폴백됩니다.
-- 침입자 감지: MongoDB 컬렉션명은 `intrusion_info`, datetime 형식은 `YYYYMMDD-HHMMSS`
-- Azure Blob: 이미지 파일명 형식은 `full_{datetime}_{class}.jpg`
+## 🧠 AI 챗봇 사용법
 
-프로젝트에 대한 문의사항이 있으시면 Issue를 통해 연락주세요.
+### SEARCH 모드 (농업 전문 지식)
+```json
+POST /api/chat
+{
+  "message": "폭염일 때 농사에서 가장 중요한 부분이 뭘까요?"
+}
+```
+
+**응답 예시:**
+```json
+{
+  "answer": "폭염 시기에는 작물별 맞춤형 물 관리와 시설 온도 조절이 가장 중요합니다...",
+  "routing": "SEARCH", 
+  "sources": [
+    "1. 폭염·폭우·태풍 대비 농작업 (p.4-5)",
+    "2. 주요 농사기술-1 (p.7-8)"
+  ],
+  "status": "success"
+}
+```
+
+### DIRECT 모드 (개인 농장 관리)
+```json
+POST /api/chat
+{
+  "message": "고추 비료 추천 내역 뽑아주세요"
+}
+```
+
+## 📚 문서 데이터베이스
+
+시스템에 포함된 농업 전문 문서들:
+- 🌶️ **농업기술길잡이**: 고추, 부추, 파 재배 매뉴얼
+- 📅 **주간농사정보**: 시기별 농작업 가이드
+- 🚜 **주요 농사기술**: 종합 농업 기술 가이드
+- 🌡️ **폭염·폭우·태풍 대비**: 기상 재해 대응 매뉴얼
+
+## 🏗️ 시스템 아키텍처
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   사용자 질문    │ ─→ │  지능형 라우터   │ ─→ │   답변 생성     │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                              │
+                    ┌─────────┴─────────┐
+                    │                   │
+            ┌───────▼────────┐  ┌───────▼────────┐
+            │ SEARCH 모드     │  │ DIRECT 모드     │
+            │                │  │                │
+            │ • 벡터 검색     │  │ • 농장 데이터   │
+            │ • 문서 검색     │  │ • 비료 추천     │
+            │ • 전문 지식     │  │ • 토양 정보     │
+            └────────────────┘  └────────────────┘
+```
+
+## 🔧 기술 스택
+
+- **Backend**: Flask, Python 3.10+
+- **AI/ML**: LangChain, FAISS, SentenceTransformers
+- **Database**: MongoDB (CosmosDB), Azure Blob Storage
+- **APIs**: 농촌진흥청 비료 API, 기상청 API
+
+## 📄 전체 API 엔드포인트
+
+| 엔드포인트 | 메서드 | 기능 | 파라미터 |
+|-----------|--------|------|----------|
+| `/api/health` | GET | 서버 상태 확인 | - |
+| `/api/chat` | POST | AI 챗봇 (핵심 기능) | `{"message": "질문"}` |
+| `/api/fertilizer-recommendation` | POST | 비료 추천 | `{"cropname": "고추"}` |
+| `/api/weather/current` | GET | 기상 정보 | `?station=108` |
+| `/api/soil/sensor` | GET | 센서 토양 검사 | - |
+| `/api/soil/satellite` | GET | 위성 토양 검사 | - |
+| `/api/intruder/recent` | GET | 침입자 감지 현황 | - |
+
+## 📋 환경 변수
+
+### 필수 API 키
+```env
+# 비료 처방을 위한 공공데이터포털 API 키 (필수)
+FERTILIZER_API_KEY=your_fertilizer_api_key_here
+
+# 기상청 API 키 (필수)
+KMA_API_KEY=your_kma_api_key_here
+
+# OpenAI API 키 (임베딩용, 선택)
+OPENAI_API_KEY=your_openai_api_key_here
+
+# 챗봇 사용을 위한 API 키
+ADOTX_API_KEY=your_adotx_api_key_here
+BASE_URL=https://guest-api.sktax.chat/v1
+```
+
+### 데이터베이스 설정
+```env
+# 데이터 소스 선택: local | cosmos | mongo | mongodb
+DATA_SOURCE=mongo
+
+# CosmosDB(Mongo API) 접속 정보
+MONGO_URI=mongodb://username:password@host:port/?ssl=true&replicaSet=globaldb
+DB_NAME=agrilook-mongo
+
+# 선택: 기본 사용자/농장 지정
+USER_ID=user001
+FARM_ID=farm001
+USER_EMAIL=farmer@example.com
+```
+
+### 서버 설정
+```env
+FLASK_ENV=development
+FLASK_DEBUG=True
+FLASK_PORT=5001
+FRONTEND_DOMAIN=https://your-frontend-app.azurewebsites.net
+
+# Azure Blob Storage 설정 (침입자 이미지용)
+AZURE_BLOB_BASE_URL=https://yourstorage.blob.core.windows.net/images
+```
+
+## 📊 데이터 구조
+
+### USER_DATA 스키마
+```python
+USER_DATA = {
+    "farm": {
+        "_id": "farm001",
+        "name": "김농부네 농장", 
+        "address": "경기도 구리시 교문동",
+        "stn": 108,  # 기상 관측소 번호
+        "area_m2": 25000,  # 250a = 25,000㎡
+        "crops": [
+            {
+                "cropname": "고추",
+                "planted_at": "2025-04-01T00:00:00Z",
+                "status": "growing"
+            }
+        ]
+    },
+    "user": {
+        "_id": "user001",
+        "name": "김농부",
+        "email": "farmer@example.com"
+    },
+    "soil": {
+        "pH": 6.5,
+        "OM": 22.0,    # 유기물 g/kg
+        "EC": 6.0,     # 전기전도도 dS/m
+        "P": 10.0,     # 유효인산 mg/kg
+        "K": 4.0,      # 치환성칼리 cmol+/kg
+        "Ca": 6.0,     # 치환성칼슘 cmol+/kg
+        "Mg": 13.0     # 치환성마그네슘 cmol+/kg
+    },
+    "location": {
+        "station": 108,
+        "address": "경기도 구리시 교문동",
+        "coord": {"lon": 127.1295, "lat": 37.5943}
+    },
+    "weather": {},  # 실시간 업데이트
+    "intruders": [] # 최근 24시간 감지 데이터
+}
+```
+
+## 🔧 고급 설정
+
+### 벡터스토어 관리
+```bash
+# 전체 재빌드 (문서 변경 시)
+python scripts/build_vectorstore.py
+
+# 새 문서만 추가 
+python scripts/build_vectorstore.py --append
+```
+
+### 비료 캐시 최적화
+- 시스템 시작 시 자동으로 작물별 비료 추천 캐시 생성
+- 캐시 키: `{farm_id}_{cropname}`
+- 실패 시 에러 상태 기록으로 디버깅 지원
+
+### 침입자 감지 설정
+- 24시간 내 감지 데이터 자동 캐시
+- Azure Blob Storage 이미지 URL 연동
+- 클래스별 카운트 및 신뢰도 정보 제공
+
+## 🔍 디버깅
+
+### 로그 레벨 설정
+```env
+LOG_LEVEL=DEBUG  # DEBUG, INFO, WARNING, ERROR
+```
+
+### 일반적인 문제들
+
+**1. CosmosDB 연결 실패**
+- MONGO_URI 형식 확인
+- IP 화이트리스트 설정
+- SSL 인증서 문제
+
+**2. 벡터스토어 로딩 실패**
+- 임베딩 모델 다운로드 대기
+- SentenceTransformer 모델 자동 다운로드
+
+**3. API 키 오류**
+- `.env` 파일 경로 확인
+- API 할당량 및 유효성 검증
+
+## 🧪 테스트
+
+### API 테스트
+```bash
+# 건강 체크
+curl http://localhost:5001/api/health
+
+# 챗봇 테스트
+curl -X POST http://localhost:5001/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "폭염 대응 방법 알려주세요"}'
+
+# 비료 추천 테스트  
+curl -X POST http://localhost:5001/api/fertilizer-recommendation \
+  -H "Content-Type: application/json" \
+  -d '{"cropname": "고추"}'
+```
+
+## 👥 팀 정보
+
+**Team VIGIL** - 농업 AI 기술로 더 나은 농사를 지원합니다
+
+## 📄 라이센스
+
+이 프로젝트는 시연용으로 제작되었습니다.
+
+---

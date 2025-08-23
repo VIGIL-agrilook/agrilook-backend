@@ -58,10 +58,12 @@ def initialize_chains():
 def chat():
     """채팅 엔드포인트"""
     global qa_chain, routing_chain
+    logging.info("[CHAT] Chat endpoint called")
     try:
-        # 체인이 초기화되지 않았으면 초기화
-        if qa_chain is None or routing_chain is None:
-            initialize_chains()
+        # 체인이 초기화되지 않았으면 초기화 (강제 재초기화)
+        logging.info("[CHAT] Force re-initializing chains...")
+        initialize_chains()
+        logging.info("[CHAT] Chains initialization completed")
         data = request.get_json()
 
         # 요청 시점에 DB 기반 USER_DATA 최신화 (환경 변수로 제어)
@@ -112,8 +114,14 @@ def chat():
         routing_result = routing_chain.invoke(routing_input)
         decision = routing_result.content if hasattr(routing_result, 'content') else str(routing_result)
         
+        # 디버깅: 라우팅 결정 로그
+        logging.info(f"[ROUTING] User message: {user_message}")
+        logging.info(f"[ROUTING] LLM decision: '{decision}'")
+        logging.info(f"[ROUTING] Decision type: {type(decision)}")
+        
         # 답변 생성
-        if "DIRECT" in decision.upper():
+        decision_clean = str(decision).strip().upper()
+        if "DIRECT" in decision_clean:
             # 검색 없이 직접 답변
             base_url = os.getenv("BASE_URL")
             adotx_api_key = os.getenv("ADOTX_API_KEY")
@@ -135,7 +143,8 @@ def chat():
             
         else:
             # 검색 기반 답변
-            result = qa_chain.invoke({"query": user_message})
+            logging.info(f"[CHAT] Calling QA chain with question: {user_message}")
+            result = qa_chain.invoke({"question": user_message})
             answer = result["result"]
             sources = format_source_documents(result["source_documents"])
             

@@ -7,22 +7,32 @@ def create_routing_chain(llm):
     """LLM이 질문 유형을 분석해서 라우팅 결정"""
     routing_template = (
 """
-당신은 농업 AI 어시스턴트의 라우터입니다. 사용자 질문을 분석하여 'DIRECT' 또는 'SEARCH' 중 하나를 선택하세요.
+농업 AI 어시스턴트의 질문 분류기입니다. 다음 질문을 'SEARCH' 또는 'DIRECT' 중 하나로 분류하세요.
 
-결정 기준:
-- 'SEARCH': 문서 검색이 필요한 농업/재배/비료/병해충/기상 지식 질문. 
-  예) 작물별 재배 매뉴얼·관리법, 병해충 진단/방제, 시비 기준, 주간 농사작업, "출처/근거" 요구.
-  (벡터스토어: 국립농업과학원 작물별 문서, 주간농사정보 등)
-- 'DIRECT': 사용자/농장 데이터만으로 답할 수 있는 질문.
-  예) 우리 농장 면적/토양 수치, 비료 추천 결과/포대수 환산, 간단 요약, 단위 변환, 현재 날씨 조회.
+분류 기준:
 
-규칙:
-- 반드시 'DIRECT' 또는 'SEARCH'만 출력.
-- 불확실하면 'SEARCH'.
-- 문장/설명/따옴표/마침표 없이 한 단어만 출력.
+'SEARCH' - 농업 전문 지식/기술이 필요한 질문:
+- 병해충 진단, 방제법, 증상 설명
+- 작물별 재배 기술, 재배 매뉴얼, 품종 특성
+- 농작업 가이드, 시기별 작업, 농업 기법
+- 폭염/가뭄/장마 등 기상 대응법
+- 일반적인 비료 시비법, 농업 기준
+- "어떻게", "방법", "기술", "매뉴얼" 관련 질문
+
+'DIRECT' - 개인 농장 데이터 관련 질문:
+- "우리 농장", "내 농장" 토양/면적/작물 정보
+- 개인 맞춤 비료 추천 요청
+- 현재 날씨, 침입자 감지 현황
+- 구체적 수치 계산, 데이터 조회
+
+질문 예시:
+"폭염일 때 농사에서 가장 중요한 부분이 뭘까요" → SEARCH
+"고추 비료 추천 내역 뽑아주세요" → DIRECT
+
+중요: 반드시 'SEARCH' 또는 'DIRECT' 한 단어만 출력하세요.
 
 질문: {question}
-"""
+응답:"""
     )
 
     routing_prompt = PromptTemplate(
@@ -36,7 +46,17 @@ def create_routing_chain(llm):
 
 def answer_without_retrieval(question: str, llm) -> str:
     """검색 없이 USER_DATA 정보만으로 답변"""
-    direct_prompt = f"""
+    from services.intruder_cache import get_intruder_context
+    
+    try:
+        intruder_info = get_intruder_context()
+        
+        # 안전한 데이터 포맷팅
+        user_data_str = str(USER_DATA) if USER_DATA else "없음"
+        fert_cache_str = str(fertilizer_cache) if fertilizer_cache else "없음"
+        intruder_info_str = str(intruder_info) if intruder_info else "없음"
+        
+        direct_prompt = f"""
 너는 농업 분야 답변을 간결하게 제공하는 전문가인 팜멘토다.
 
 출력 규칙:
@@ -49,6 +69,7 @@ def answer_without_retrieval(question: str, llm) -> str:
   - 밑거름/웃거름 각각 최대 3행만 표시
   - 표 컬럼: 단계 | 비료명 | N-P2O5-K2O | 사용량(kg) | 포대수 | 부족 P(kg) | 부족 K(kg)
   - 퇴비가 포함되면 별도 표로: 종류 | kg (계분/우분/돈분/혼합)
+- 침입자/보안 질문에는 감지 현황을 간단히 요약해서 답변한다.
 
 데이터 사용 규칙:
 - 아래 컨텍스트는 참조용이며 그대로 출력하지 않는다(원문, 전체 덤프 금지).
@@ -57,10 +78,21 @@ def answer_without_retrieval(question: str, llm) -> str:
 - 단위는 필요 시 a(아르)와 kg로 간단히 표기한다.
 
 컨텍스트(출력 금지):
-- USER_DATA: {USER_DATA}
-- FERT_CACHE: {fertilizer_cache}
+- USER_DATA: {user_data_str}
+- FERT_CACHE: {fert_cache_str}
+- INTRUDER_INFO: {intruder_info_str}
 
 질문: {question}
+"""
+        
+    except Exception as e:
+        # 데이터 로드 실패 시 단순 프롬프트
+        direct_prompt = f"""
+너는 농업 전문가다. 다음 질문에 간단히 답변하라:
+
+질문: {question}
+
+답변:
 """
     
     try:

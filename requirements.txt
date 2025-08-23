@@ -8,20 +8,15 @@ flask-cors==5.0.0
 requests==2.32.4
 xmltodict==0.14.2
 
-# 데이터 분석 및 처리
-pandas>=2.0.0
-numpy>=1.24.0
-
 # LangChain AI 체인
 langchain==0.3.27
 langchain-openai==0.3.29
 langchain-community==0.3.27
 
-# 벡터 검색 (FAISS, BM25)
+# 벡터 검색
 faiss-cpu==1.11.0.post1
-rank-bm25==0.2.2
 
-# PDF 로딩
+# PDF 로딩 (벡터스토어 빌드용)
 pypdf==5.1.0
 
 # OpenAI API
@@ -32,3 +27,8 @@ python-dateutil>=2.8.0
 
 # MongoDB
 pymongo==4.7.2
+
+# Hugging Face 임베딩
+sentence-transformers>=3.0.0
+torch>=2.4.0
+langchain-huggingface>=0.1.0

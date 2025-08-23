@@ -1,5 +1,4 @@
-import sys, os, copy, traceback, logging
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import os, copy, logging
 
 from config.user_data import USER_DATA
 import time
@@ -16,6 +15,7 @@ def initialize_fertilizer_cache():
     - 없으면 기존 get_recommendation_bundle()로 폴백 (전역 USER_DATA를 일시 변경 후 복구)
     - 작물별로 캐시에 저장: key = f"{farm_id}_{cropname}"
     """
+    logger.info("[INIT] Starting fertilizer cache initialization...")
     service = SoilFertilizerService()
     farm = USER_DATA.get("farm", {})
     farm_id = farm.get("_id", "farm")

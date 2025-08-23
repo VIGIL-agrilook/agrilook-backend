@@ -123,5 +123,9 @@ fertilizer_db_import.py
 
 /scripts/
 
+# Azurite local storage files (Azure Blob Storage 에뮬레이터)
+__azurite_db_*.json
+__blobstorage__/
+
 # 로컬 문서(PDF) 저장 폴더 - 원문 파일은 Git에 제외
 /docs/

@@ -33,7 +33,7 @@ class IntruderCache:
     def _fetch_recent_intruders(self, hours_limit: int = 24) -> List[Dict[str, Any]]:
         """최근 침입자 데이터 조회"""
         client, db = self._get_db()
-        if not client or not db:
+        if client is None or db is None:
             return []
         
         try:

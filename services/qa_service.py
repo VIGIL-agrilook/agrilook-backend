@@ -2,14 +2,10 @@ import os
 import re
 import logging
 from langchain_community.vectorstores import FAISS
-from langchain_openai import OpenAIEmbeddings
-from langchain.chains.retrieval_qa.base import RetrievalQA
 from langchain.prompts import PromptTemplate
-from langchain_community.retrievers import BM25Retriever
-from langchain.retrievers import EnsembleRetriever
+from langchain.chains import LLMChain
+from langchain.schema.runnable import RunnableLambda
 from config.user_data import USER_DATA
-from config.crop_codes import get_crop_code, get_crop_name
-from services.soil_fertilizer_cache import fertilizer_cache
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +22,15 @@ def load_qa_chain():
     VECTOR_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "vectorstore")
     
     try:
-        embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
+        try:
+            from langchain_huggingface import HuggingFaceEmbeddings
+        except ImportError:
+            from langchain_community.embeddings import HuggingFaceEmbeddings
+        embeddings = HuggingFaceEmbeddings(
+            model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+            model_kwargs={'device': 'cpu'},
+            encode_kwargs={'normalize_embeddings': True}
+        )
         vectorstore = FAISS.load_local(
             VECTOR_DIR, 
             embeddings, 
@@ -37,42 +41,12 @@ def load_qa_chain():
             search_kwargs={"k": 5}
         )
         
-        # 하이브리드 검색 설정
-        all_docs = []
-        all_texts = vectorstore.docstore._dict
-        for doc_id, doc in all_texts.items():
-            if hasattr(doc, 'page_content') and len(doc.page_content.strip()) > 50:
-                all_docs.append(doc)
-        
-        if all_docs:
-            # 품질 필터링 (길이 기준)
-            top_quality_docs = sorted(all_docs, key=lambda x: len(x.page_content), reverse=True)[:300]
-            
-            processed_docs = []
-            for doc in top_quality_docs:
-                processed_text = " ".join(ko_basic_tokenizer(doc.page_content))
-                if len(processed_text.strip()) > 10:
-                    processed_doc = type(doc)(
-                        page_content=processed_text, 
-                        metadata=doc.metadata
-                    )
-                    processed_docs.append(processed_doc)
-            
-            if processed_docs:
-                bm25_retriever = BM25Retriever.from_documents(processed_docs)
-                bm25_retriever.k = 3
-                
-                retriever = EnsembleRetriever(
-                    retrievers=[vector_retriever, bm25_retriever],
-                    weights=[0.7, 0.3]
-                )
-            else:
-                retriever = vector_retriever
-        else:
-            retriever = vector_retriever
+        # 임시로 벡터 검색만 사용 (BM25 비활성화)
+        retriever = vector_retriever
+        logging.info("[QA] Using vector retriever only (BM25 disabled for debugging)")
         
     except Exception as e:
-        logger.exception("하이브리드 검색 설정 중 오류")
+        logger.exception("벡터스토어 설정 중 오류")
         retriever = vector_retriever
     
     # LLM 설정
@@ -86,24 +60,30 @@ def load_qa_chain():
         api_key=adotx_api_key
     )
     
-    # USER_DATA 기반 프롬프트
-
+    # 농업 지식 기반 프롬프트 (농장 정보 참고)
+    # USER_DATA 임포트
+    from config.user_data import USER_DATA
+    
+    # USER_DATA를 안전하게 문자열로 변환 (중괄호 이스케이프)
+    user_data_str = str(USER_DATA).replace('{', '{{').replace('}', '}}')
+    
     template = f"""
-너는 작물 재배, 병충해 방제, 농업 기상 해석에 전문성을 가진 농업 전문가다. 
-아래 컨텍스트를 기반으로 질문에 대해 구체적이고 실용적인 농사 조언을 제공하라.
+너는 작물 재배, 병충해 방제, 농업 기술에 전문성을 가진 농업 전문가다. 
+아래 농업 문서 컨텍스트를 기반으로 질문에 대해 구체적이고 실용적인 농사 조언을 제공하라.
 
 **중요: 농업 표준 단위를 반드시 사용하세요**
 - 면적: a(아르) 단위 사용 (1a = 100㎡, 10a = 1,000㎡)
 - 농가 면적은 통상 "몇 a" 단위로 표현
 - 예: "10a당 질소 15kg", "250a 농장에서는..."
 
-현재 사용자 농장 정보:
-- 현재 날짜: 2025년 8월 14일
-- 사용자 정보 : {USER_DATA}
-- 사용자 농장 비료 추천 :{fertilizer_cache}
+사용자 농장 정보 (참고용):
+{user_data_str}
 
-사용자 농지 데이터는 참고만 하고, 절대 새로운 수치·사실 생성 근거로 사용하지 마,
-RAG 컨텍스트에서 동일 주제 관련 정보가 있을 때만 조언에 포함.
+답변 원칙:
+- 제공된 농업 문서 컨텍스트에서만 정보를 추출하여 답변 (농업기술길잡이, 주요농사기술, 주간농업정보 등)
+- 사용자 농장 정보는 답변을 개인화하는 참고 자료로만 활용 (토양/비료 수치는 직접 언급하지 않음)
+- 일반적인 농업 기술 지식과 시기별 농작업 정보에 집중
+- 주간농업정보(25~31일)에서 시기별 작업 가이드 제공 가능
 ex) 노린재 질문에 토양성분에 대한 내용을 포함하지 말고 병충해 특히 노린재에 대한 답변만 해
 
 
@@ -125,14 +105,39 @@ ex) 노린재 질문에 토양성분에 대한 내용을 포함하지 말고 병
 답변:
 """
     
-    QA_CHAIN_PROMPT = PromptTemplate.from_template(template)
-    
-    qa_chain = RetrievalQA.from_chain_type(
-        llm,
-        retriever=retriever,
-        return_source_documents=True,
-        chain_type_kwargs={"prompt": QA_CHAIN_PROMPT}
+    QA_CHAIN_PROMPT = PromptTemplate(
+        template=template,
+        input_variables=["context", "question"]
     )
+    
+    logging.info(f"[QA] Creating custom QA chain with input variables: {QA_CHAIN_PROMPT.input_variables}")
+    
+    # RetrievalQA 대신 수동으로 QA 체인 구성
+    from langchain.chains import LLMChain
+    from langchain.schema.runnable import RunnableLambda
+    from langchain.schema import Document
+    
+    def qa_chain_func(inputs):
+        question = inputs["question"]
+        
+        # 1. 검색 수행
+        docs = retriever.get_relevant_documents(question)
+        
+        # 2. 컨텍스트 생성
+        context = "\n\n".join([doc.page_content for doc in docs])
+        
+        # 3. LLM 체인 생성 및 실행
+        llm_chain = LLMChain(llm=llm, prompt=QA_CHAIN_PROMPT)
+        result = llm_chain.run(context=context, question=question)
+        
+        return {
+            "result": result,
+            "source_documents": docs
+        }
+    
+    qa_chain = RunnableLambda(qa_chain_func)
+    
+    logging.info("[QA] Custom QA chain created successfully")
     
     return qa_chain
 
@@ -147,20 +152,33 @@ def format_source_documents(docs) -> list:
         page = doc.metadata.get("page")
         
         # 파일명 정리
-        source_name = source.replace("_ocr_OCR.pdf", "").replace("_", " ")
-        if "weekly farm" in source_name.lower():
-            match = re.search(r'(\d+)', source_name)
+        source_name = source.replace("_OCR.pdf", "").replace("_OCR.PDF", "").replace("_", " ")
+        
+        if "주간농사정보" in source_name:
+            # 주간농사정보 제33호(2025.8.25.~8.31.).pdf → 주간농사정보 제33호
+            match = re.search(r'제(\d+)호', source_name)
             if match:
                 source_name = f"주간농사정보 제{match.group(1)}호"
-        elif "cucumber" in source_name.lower():
-            source_name = "오이 재배 가이드"
-        elif "tomato" in source_name.lower():
-            source_name = "토마토 재배 가이드"
-        elif "cabbage" in source_name.lower():
-            source_name = "배추 재배 가이드"
+        elif "농업기술길잡이" in source_name:
+            # 농업기술길잡이_115_고추_OCR.pdf → 농업기술길잡이 - 고추
+            if "고추" in source_name:
+                source_name = "농업기술길잡이 - 고추"
+            elif "부추" in source_name:
+                source_name = "농업기술길잡이 - 부추"
+            elif "파" in source_name:
+                source_name = "농업기술길잡이 - 파"
+        elif "주요 농사기술" in source_name:
+            if "1" in source_name:
+                source_name = "주요 농사기술-1"
+            elif "2" in source_name:
+                source_name = "주요 농사기술-2"
+        elif "폭염" in source_name or "폭우" in source_name or "태풍" in source_name:
+            source_name = "폭염·폭우·태풍 대비 농작업"
         else:
             # 확장자 제거
             if source_name.endswith('.pdf'):
+                source_name = source_name[:-4]
+            elif source_name.endswith('.PDF'):
                 source_name = source_name[:-4]
             elif source_name.endswith('.txt'):
                 source_name = source_name[:-4]
@@ -176,6 +194,4 @@ def format_source_documents(docs) -> list:
     return formatted_sources
 
 
-def get_fertilizer_prompt(farm_id, cropname):
-    key = f"{farm_id}_{cropname}"
-    return f"추천 결과: {fertilizer_cache.get(key)}"
+
