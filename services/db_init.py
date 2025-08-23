@@ -1,6 +1,6 @@
 import os
-from typing import Dict, Any, Optional
-from datetime import datetime
+from typing import Dict, Any, Optional, List
+from datetime import datetime, timedelta
 
 import pymongo
 import re
@@ -49,6 +49,41 @@ def _find_farm(db, farm_id: Optional[str], user: Optional[Dict[str, Any]]):
                 return doc
     # any farm as last resort
     return farms.find_one({})
+
+
+def _find_recent_intruders(db, farm: Optional[Dict[str, Any]], hours_limit: int = 24) -> List[Dict[str, Any]]:
+    """최근 침입자 감지 데이터 조회 (챗봇용)"""
+    if not farm:
+        return []
+    
+    farm_id = farm.get("_id") or farm.get("farm_id") or farm.get("farmId") or farm.get("id")
+    if not farm_id:
+        return []
+    
+    intruders = db.get_collection("intrusion_info")
+    cutoff_time = datetime.utcnow() - timedelta(hours=hours_limit)
+    
+    # farm_id로 조회
+    all_docs = list(intruders.find({"farm_id": farm_id}).sort("datetime", pymongo.DESCENDING))
+    
+    # datetime 문자열을 파싱해서 필터링
+    filtered_docs = []
+    for doc in all_docs:
+        datetime_str = doc.get("datetime", "")
+        try:
+            doc_datetime = datetime.strptime(datetime_str, "%Y%m%d-%H%M%S")
+            if doc_datetime >= cutoff_time:
+                # 챗봇용이므로 이미지 URL은 제외
+                filtered_docs.append({
+                    "class": doc.get("class", "unknown"),
+                    "confidence": doc.get("confidence", "0%"),
+                    "datetime": datetime_str,
+                    "datetime_iso": doc_datetime.isoformat()
+                })
+        except Exception:
+            continue
+    
+    return filtered_docs
 
 
 def _find_latest_soiltest(db, farm: Optional[Dict[str, Any]]):
@@ -176,6 +211,7 @@ def load_user_data_from_db(user_id: Optional[str] = None, farm_id: Optional[str]
         user = _find_user(db, user_id, user_email)
         farm = _find_farm(db, farm_id, user)
         soiltest = _find_latest_soiltest(db, farm)
+        intruders = _find_recent_intruders(db, farm)
 
         # 기본 방어값
         farm = farm or {}
@@ -195,6 +231,7 @@ def load_user_data_from_db(user_id: Optional[str] = None, farm_id: Optional[str]
             "soil": soil,
             "location": location,
             "weather": {},
+            "intruders": intruders,
         }
     finally:
         client.close()

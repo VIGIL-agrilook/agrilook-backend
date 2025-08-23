@@ -8,9 +8,11 @@ from routes.weather import weather_bp
 from routes.chat import chat_bp
 from routes.health import health_bp
 from routes.soil import soil_bp
+from routes.intruder import intruder_bp
 from services.soil_fertilizer_cache import initialize_fertilizer_cache
 from services.weather_service import initialize_weather_data
 from services.db_init import initialize_user_data_from_db
+from services.intruder_cache import initialize_intruder_cache
 
 load_dotenv()
 
@@ -26,6 +28,7 @@ app.register_blueprint(fertilizer_bp)
 app.register_blueprint(weather_bp)
 app.register_blueprint(chat_bp)
 app.register_blueprint(soil_bp)
+app.register_blueprint(intruder_bp)
 
 if __name__ == '__main__':
     # 데이터 소스 선택: env DATA_SOURCE=cosmos 일 때 CosmosDB에서 로드
@@ -43,5 +46,6 @@ if __name__ == '__main__':
 
     initialize_fertilizer_cache()
     initialize_weather_data()
+    initialize_intruder_cache()
     port = int(os.environ.get('PORT', 5001))
     app.run(host='0.0.0.0', port=port, debug=os.getenv("FLASK_DEBUG", "0") == "1")

@@ -138,14 +138,15 @@ ex) 노린재 질문에 토양성분에 대한 내용을 포함하지 말고 병
 
 
 def format_source_documents(docs) -> list:
-    """출처 문서를 간단하게 포맷팅"""
+    """출처 문서를 간단하게 포맷팅 - 페이지 정보 포함"""
     formatted_sources = []
     display_docs = docs[:3]
     
     for i, doc in enumerate(display_docs, 1):
         source = doc.metadata.get("source", "unknown")
-        page = doc.metadata.get("page", "?")
+        page = doc.metadata.get("page")
         
+        # 파일명 정리
         source_name = source.replace("_ocr_OCR.pdf", "").replace("_", " ")
         if "weekly farm" in source_name.lower():
             match = re.search(r'(\d+)', source_name)
@@ -157,8 +158,20 @@ def format_source_documents(docs) -> list:
             source_name = "토마토 재배 가이드"
         elif "cabbage" in source_name.lower():
             source_name = "배추 재배 가이드"
+        else:
+            # 확장자 제거
+            if source_name.endswith('.pdf'):
+                source_name = source_name[:-4]
+            elif source_name.endswith('.txt'):
+                source_name = source_name[:-4]
+            elif source_name.endswith('.md'):
+                source_name = source_name[:-3]
         
-        formatted_sources.append(f"{i}. {source_name} (p.{page})")
+        # 페이지 정보 포함
+        if page is not None:
+            formatted_sources.append(f"{i}. {source_name} (p.{page})")
+        else:
+            formatted_sources.append(f"{i}. {source_name}")
     
     return formatted_sources
 

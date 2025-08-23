@@ -48,13 +48,20 @@ def _respond_latest(src_exact: str):
 	farm_id = request.args.get('farmid') or os.getenv('FARM_ID')
 	client, db = _get_db()
 	try:
-		row = _find_latest_soil(db, farm_id, src_exact=src_exact) or {}
-		return jsonify({
-			"farm_id": farm_id,
-			"source": (row.get("src") if row else src_exact),
-			"tested_at": _to_iso(row.get("tested_at")) if row else None,
-			"result": (row.get("result") if row else {}),
-		})
+		row = _find_latest_soil(db, farm_id, src_exact=src_exact)
+		if not row:
+			return jsonify({
+				"message": "해당 조건의 토양검사 데이터가 없습니다.",
+				"farm_id": farm_id,
+				"source": src_exact
+			})
+		
+		# DB 구조 그대로 반환 (tested_at은 ISO 형식으로 변환)
+		result = dict(row)
+		if row.get("tested_at"):
+			result["tested_at"] = _to_iso(row["tested_at"])
+		
+		return jsonify(result)
 	finally:
 		client.close()
 

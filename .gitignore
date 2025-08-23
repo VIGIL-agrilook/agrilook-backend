@@ -122,3 +122,6 @@ fertilizer_db_import.py
 *.pdf
 
 /scripts/
+
+# 로컬 문서(PDF) 저장 폴더 - 원문 파일은 Git에 제외
+/docs/
