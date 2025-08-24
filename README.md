@@ -62,15 +62,19 @@
 ```json
 // 응답
 {
-  "status": "success",
-  "station": 108,
   "temperature": 25.3,
   "humidity": 65,
   "precipitation": 0,
-  "weather": "맑음",
-  "timestamp": "2025-08-25T14:30:00Z"
+  "weather": "맑음"  // 한글 날씨 분류: "비", "눈", "흐림", "조금 흐림", "맑음"
 }
 ```
+
+**날씨 분류 기준:**
+- `비`: 강수량 > 0.1mm, 온도 > 0°C
+- `눈`: 강수량 > 0.1mm, 온도 ≤ 0°C  
+- `흐림`: 구름량 ≥ 8 (80% 이상)
+- `조금 흐림`: 구름량 4-8 (40-80%)
+- `맑음`: 구름량 < 4 (40% 미만)
 
 #### 4. 🛡️ 농장 관리
 
@@ -99,25 +103,39 @@ GET /api/soil/satellite # 위성 기반 데이터
 
 **침입자 감지**
 ```bash
-GET /api/intruder/recent
+GET /api/intruder/recent                    # 최근 24시간
+GET /api/intruder/recent?hours=12           # 최근 12시간
+GET /api/intruder/recent?farmid=farm_0001   # 특정 농장
 ```
 ```json
 // 응답
 {
-  "status": "success",
-  "summary": {
-    "total_detections": 5,
-    "classes": {
-      "멧돼지": 3,
-      "고라니": 2
-    }
+  "farm_id": "farm_0001",
+  "hours_filter": 24,
+  "total_count": 6,
+  "class_counts": {
+    "human": 2,
+    "squirrel": 1,
+    "wild_boar": 3
   },
-  "recent_detections": [
+  "data": [
     {
-      "class": "멧돼지",
-      "confidence": "95%", 
-      "datetime": "20250825-143022",
-      "image_url": "https://storage.blob.core.windows.net/images/detection_001.jpg"
+      "id": "0182",
+      "class": "human",
+      "confidence": "52%",
+      "datetime": "20250824-093635",
+      "datetime_iso": "2025-08-24T09:36:35",
+      "farm_id": "farm_0001",
+      "image_url": "https://agrilookstorage.blob.core.windows.net/intrusion-images/full_20250824-093635_human.jpg"
+    },
+    {
+      "id": "0181", 
+      "class": "squirrel",
+      "confidence": "63%",
+      "datetime": "20250824-093522",
+      "datetime_iso": "2025-08-24T09:35:22",
+      "farm_id": "farm_0001",
+      "image_url": "https://agrilookstorage.blob.core.windows.net/intrusion-images/full_20250824-093522_squirrel.jpg"
     }
   ]
 }
@@ -151,6 +169,8 @@ api/
 ├── vectorstore/               # FAISS 벡터 저장소
 ├── scripts/                   # 유틸리티 스크립트
 └── utils/                     # 공통 유틸리티
+    ├── fertilizer_recommender.py  # 비료 추천 로직
+    └── weather_utils.py       # 날씨 분류 함수
 ```
 
 ## 🚀 빠른 시작
@@ -245,7 +265,7 @@ POST /api/chat
 | `/api/weather/current` | GET | 기상 정보 | `?station=108` |
 | `/api/soil/sensor` | GET | 센서 토양 검사 | - |
 | `/api/soil/satellite` | GET | 위성 토양 검사 | - |
-| `/api/intruder/recent` | GET | 침입자 감지 현황 | - |
+| `/api/intruder/recent` | GET | 침입자 감지 현황 | `?hours=24&farmid=farm001` |
 
 ## 📋 환경 변수
 
