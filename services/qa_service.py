@@ -63,9 +63,13 @@ def load_qa_chain():
     # 농업 지식 기반 프롬프트 (농장 정보 참고)
     # USER_DATA 임포트
     from config.user_data import USER_DATA
+    from services.soil_fertilizer_cache import fertilizer_cache
     
     # USER_DATA를 안전하게 문자열로 변환 (중괄호 이스케이프)
     user_data_str = str(USER_DATA).replace('{', '{{').replace('}', '}}')
+    
+    # 비료 캐시를 안전하게 문자열로 변환
+    fertilizer_info_str = str(fertilizer_cache).replace('{', '{{').replace('}', '}}') if fertilizer_cache else "없음"
     
     template = f"""
 너는 작물 재배, 병충해 방제, 농업 기술에 전문성을 가진 농업 전문가다. 
@@ -79,9 +83,13 @@ def load_qa_chain():
 사용자 농장 정보 (참고용):
 {user_data_str}
 
+현재 비료 처방 정보 (참고용):
+{fertilizer_info_str}
+
 답변 원칙:
 - 제공된 농업 문서 컨텍스트에서만 정보를 추출하여 답변 (농업기술길잡이, 주요농사기술, 주간농업정보 등)
 - 사용자 농장 정보는 답변을 개인화하는 참고 자료로만 활용 (토양/비료 수치는 직접 언급하지 않음)
+- **비료/처방 관련 질문 시에는 위의 "현재 비료 처방 정보"를 적극 활용하여 구체적인 비료명, 사용량, 포대수 등을 포함한 맞춤형 답변 제공**
 - 일반적인 농업 기술 지식과 시기별 농작업 정보에 집중
 - 주간농업정보(25~31일)에서 시기별 작업 가이드 제공 가능
 ex) 노린재 질문에 토양성분에 대한 내용을 포함하지 말고 병충해 특히 노린재에 대한 답변만 해
