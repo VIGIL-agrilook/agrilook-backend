@@ -143,7 +143,7 @@ ex) 노린재 질문에 토양성분에 대한 내용을 포함하지 말고 병
 
 
 def format_source_documents(docs) -> list:
-    """출처 문서를 간단하게 포맷팅 - 페이지 정보 포함"""
+    """출처 문서를 간단하게 포맷팅 - 페이지 정보 및 URL 포함"""
     formatted_sources = []
     display_docs = docs[:3]
     
@@ -154,26 +154,36 @@ def format_source_documents(docs) -> list:
         # 파일명 정리
         source_name = source.replace("_OCR.pdf", "").replace("_OCR.PDF", "").replace("_", " ")
         
+        # 문서별 URL 매핑 (build_vectorstore.py의 DOCUMENT_URLS와 동일)
+        doc_url = None
+        
         if "주간농사정보" in source_name:
             # 주간농사정보 제33호(2025.8.25.~8.31.).pdf → 주간농사정보 제33호
             match = re.search(r'제(\d+)호', source_name)
             if match:
                 source_name = f"주간농사정보 제{match.group(1)}호"
+                doc_url = "https://www.nongsaro.go.kr/portal/contentsFileView.do?cntntsNo=262533&fileSeCode=185001&fileSn=1"
         elif "농업기술길잡이" in source_name:
             # 농업기술길잡이_115_고추_OCR.pdf → 농업기술길잡이 - 고추
             if "고추" in source_name:
                 source_name = "농업기술길잡이 - 고추"
+                doc_url = "https://www.nongsaro.go.kr/portal/ps/psb/psbx/cropEbookLst.ps?menuId=PS65290&sText=&pageIndex=1&pageSize=10&sKeyword=&sNameOrderAt=Y&group2Cnt=&cropEbookGubunChk=&sStdPrdlstCode=&sStdTchnlgyCode=&stdPrdlstCode=&sRdaStdPrdlstCode=&sRdaStdTchnlgyCode=&kidofcomdtyNo=0&sOldDtShowAt=N&sSearchText=&sSearchType=srchType02&cNo=53&stdItemCd=VC011205&cropsEbookNm=%EA%B3%A0%EC%B6%94"
             elif "부추" in source_name:
                 source_name = "농업기술길잡이 - 부추"
+                doc_url = "https://www.nongsaro.go.kr/portal/ps/psb/psbx/cropEbookLst.ps?menuId=PS65290&sText=&pageIndex=1&pageSize=10&sKeyword=&sNameOrderAt=Y&group2Cnt=&cropEbookGubunChk=&sStdPrdlstCode=&sStdTchnlgyCode=&stdPrdlstCode=&sRdaStdPrdlstCode=&sRdaStdTchnlgyCode=&kidofcomdtyNo=0&sOldDtShowAt=N&sSearchText=&sSearchType=srchType02&cNo=61&stdItemCd=VC021010&cropsEbookNm=%EB%B6%80%EC%B6%94"
             elif "파" in source_name:
                 source_name = "농업기술길잡이 - 파"
+                doc_url = "https://www.nongsaro.go.kr/portal/ps/psb/psbx/cropEbookLst.ps?menuId=PS65290&sText=&pageIndex=1&pageSize=10&sKeyword=&sNameOrderAt=Y&group2Cnt=&cropEbookGubunChk=&sStdPrdlstCode=&sStdTchnlgyCode=&stdPrdlstCode=&sRdaStdPrdlstCode=&sRdaStdTchnlgyCode=&kidofcomdtyNo=0&sOldDtShowAt=N&sSearchText=&sSearchType=srchType02&cNo=133&stdItemCd=VC041202&cropsEbookNm=%ED%8C%8C"
         elif "주요 농사기술" in source_name:
             if "1" in source_name:
                 source_name = "주요 농사기술-1"
+                doc_url = "https://www.nongsaro.go.kr/portal/bsFileView.do?ep=a5gb/CMEYLclIUPoWw9/DZpAzn2z8@sWTCNA5pR4wDVpzfVJj79Y8WiAGSZ8dpOLr/BD1mimyxS24DCPRsGqxQ!!"
             elif "2" in source_name:
                 source_name = "주요 농사기술-2"
+                doc_url = "https://www.nongsaro.go.kr/portal/bsFileView.do?ep=a5gb/CMEYLclIUPoWw9/DZpAzn2z8@sWTCNA5pR4wDVpzfVJj79Y8WiAGSZ8dpOLzikZYGMo0Hz8ayNFiXs3DQ!!"
         elif "폭염" in source_name or "폭우" in source_name or "태풍" in source_name:
             source_name = "폭염·폭우·태풍 대비 농작업"
+            doc_url = "https://www.nongsaro.go.kr/portal/ps/psv/psvr/psvre/curationDtl.ps?menuId=PS03352&srchCurationNo=1536"
         else:
             # 확장자 제거
             if source_name.endswith('.pdf'):
@@ -185,11 +195,17 @@ def format_source_documents(docs) -> list:
             elif source_name.endswith('.md'):
                 source_name = source_name[:-3]
         
-        # 페이지 정보 포함
+        # 페이지 정보와 URL 포함
         if page is not None:
-            formatted_sources.append(f"{i}. {source_name} (p.{page})")
+            if doc_url:
+                formatted_sources.append(f"{i}. {source_name} (p.{page}) - {doc_url}")
+            else:
+                formatted_sources.append(f"{i}. {source_name} (p.{page})")
         else:
-            formatted_sources.append(f"{i}. {source_name}")
+            if doc_url:
+                formatted_sources.append(f"{i}. {source_name} - {doc_url}")
+            else:
+                formatted_sources.append(f"{i}. {source_name}")
     
     return formatted_sources
 

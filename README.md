@@ -207,12 +207,14 @@ POST /api/chat
   "answer": "폭염 시기에는 작물별 맞춤형 물 관리와 시설 온도 조절이 가장 중요합니다...",
   "routing": "SEARCH", 
   "sources": [
-    "1. 폭염·폭우·태풍 대비 농작업 (p.4-5)",
-    "2. 주요 농사기술-1 (p.7-8)"
+    "1. 폭염·폭우·태풍 대비 농작업 (p.4-5) - https://www.nongsaro.go.kr/portal/ps/psv/psvr/psvre/curationDtl.ps?menuId=PS03352&srchCurationNo=1536",
+    "2. 주요 농사기술-1 (p.7-8) - https://www.nongsaro.go.kr/portal/bsFileView.do?ep=a5gb/CMEYLclIUPoWw9/DZpAzn2z8@sWTCNA5pR4wDVpzfVJj79Y8WiAGSZ8dpOLr/BD1mimyxS24DCPRsGqxQ!!"
   ],
   "status": "success"
 }
 ```
+
+> 💡 **sources에 포함된 URL을 클릭하면 농사로(nongsaro.go.kr)의 원본 문서로 바로 이동할 수 있습니다.**
 
 ### DIRECT 모드 (개인 농장 관리)
 ```json
